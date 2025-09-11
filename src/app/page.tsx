@@ -1,103 +1,156 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import FourPanelLayout from '@/components/FourPanelLayout';
+import UnifiedInput from '@/components/UnifiedInput';
+import { AIModel, Message } from '@/types';
+
+// Mock data for development
+const mockModels: AIModel[] = [
+  {
+    id: 'gpt-4',
+    name: 'GPT-4',
+    provider: 'OpenAI',
+    apiEndpoint: 'https://api.openai.com/v1/chat/completions',
+    costPerToken: 0.03,
+    maxTokens: 8192,
+    isActive: true,
+    displayOrder: 1
+  },
+  {
+    id: 'claude-3',
+    name: 'Claude 3',
+    provider: 'Anthropic',
+    apiEndpoint: 'https://api.anthropic.com/v1/messages',
+    costPerToken: 0.025,
+    maxTokens: 4096,
+    isActive: true,
+    displayOrder: 2
+  },
+  {
+    id: 'gemini-pro',
+    name: 'Gemini Pro',
+    provider: 'Google',
+    apiEndpoint: 'https://generativelanguage.googleapis.com/v1/models',
+    costPerToken: 0.02,
+    maxTokens: 2048,
+    isActive: true,
+    displayOrder: 3
+  }
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [selectedModels, setSelectedModels] = useState<(AIModel | null)[]>([
+    mockModels[0], // GPT-4
+    mockModels[1], // Claude 3
+    mockModels[2], // Gemini Pro
+    null
+  ]);
+  const [messages, setMessages] = useState<Record<string, Message[]>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const handleModelSelect = (panelIndex: number, modelId: string | null) => {
+    const model = modelId ? mockModels.find(m => m.id === modelId) || null : null;
+    setSelectedModels(prev => {
+      const updated = [...prev];
+      updated[panelIndex] = model;
+      return updated;
+    });
+  };
+
+  const activeModels = selectedModels.filter(model => model !== null) as AIModel[];
+  const activeModelCount = activeModels.length;
+
+  const handleSendToModels = async (content: string) => {
+    if (activeModelCount === 0) return;
+
+    setIsLoading(true);
+    
+    // Add user message to all active models
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content,
+      role: 'user',
+      timestamp: new Date()
+    };
+
+    const updatedMessages = { ...messages };
+    activeModels.forEach(model => {
+      if (!updatedMessages[model.id]) {
+        updatedMessages[model.id] = [];
+      }
+      updatedMessages[model.id] = [...updatedMessages[model.id], userMessage];
+    });
+    setMessages(updatedMessages);
+
+    // Call AI APIs
+    const promises = activeModels.map(async (model) => {
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: content,
+            modelId: model.id
+          })
+        });
+
+        const data = await response.json();
+        
+        const aiMessage: Message = {
+          id: `${Date.now()}-${model.id}-${Math.random()}`,
+          content: data.error ? `エラー: ${data.error}` : data.content,
+          role: 'assistant',
+          timestamp: new Date(),
+          modelId: model.id
+        };
+
+        setMessages(prev => ({
+          ...prev,
+          [model.id]: [...(prev[model.id] || []), aiMessage]
+        }));
+      } catch (error) {
+        const errorMessage: Message = {
+          id: `${Date.now()}-${model.id}-error`,
+          content: `エラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          role: 'assistant',
+          timestamp: new Date(),
+          modelId: model.id
+        };
+
+        setMessages(prev => ({
+          ...prev,
+          [model.id]: [...(prev[model.id] || []), errorMessage]
+        }));
+      }
+    });
+
+    // Wait for all API calls to complete
+    await Promise.all(promises);
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="h-screen flex flex-col">
+      <header className="border-b bg-white p-4">
+        <h1 className="text-2xl font-bold text-gray-800">AIくらべ</h1>
+        <p className="text-sm text-gray-600">4つのパネルで複数のAIモデルを同時に比較</p>
+      </header>
+      
+      <FourPanelLayout
+        models={mockModels}
+        selectedModels={selectedModels}
+        messages={messages}
+        onModelSelect={handleModelSelect}
+      />
+      
+      <UnifiedInput
+        onSend={handleSendToModels}
+        disabled={isLoading}
+        activeModelCount={activeModelCount}
+      />
     </div>
   );
 }
