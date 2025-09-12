@@ -11,11 +11,21 @@ export interface AIResponse {
   error?: string;
 }
 
-export async function callClaude(message: string): Promise<AIResponse> {
+export async function callClaude(message: string, modelId: string): Promise<AIResponse> {
   try {
+    // Get model display name
+    const modelDisplayNames: Record<string, string> = {
+      'claude-3-5-sonnet-20241022': 'Claude 3.5 Sonnet (Latest)',
+      'claude-3-5-sonnet-20240620': 'Claude 3.5 Sonnet (June)',
+      'claude-3-5-haiku-20241022': 'Claude 3.5 Haiku',
+      'claude-3-opus-20240229': 'Claude 3 Opus',
+      'claude-3-sonnet-20240229': 'Claude 3 Sonnet',
+      'claude-3-haiku-20240307': 'Claude 3 Haiku',
+    };
+
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 1000,
+      model: modelId,
+      max_tokens: 4000,
       messages: [
         {
           role: 'user',
@@ -28,7 +38,7 @@ export async function callClaude(message: string): Promise<AIResponse> {
     if (content.type === 'text') {
       return {
         content: content.text,
-        model: 'Claude 3',
+        model: modelDisplayNames[modelId] || modelId,
         tokens: response.usage.output_tokens
       };
     }
@@ -38,7 +48,7 @@ export async function callClaude(message: string): Promise<AIResponse> {
     console.error('Claude API Error:', error);
     return {
       content: 'エラーが発生しました。Claude APIの呼び出しに失敗しました。',
-      model: 'Claude 3',
+      model: modelId,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }

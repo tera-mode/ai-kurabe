@@ -7,6 +7,7 @@ import { AIModel, Message } from '@/types';
 
 // Mock data for development
 const mockModels: AIModel[] = [
+  // OpenAI Models
   {
     id: 'gpt-4',
     name: 'GPT-4',
@@ -17,16 +18,68 @@ const mockModels: AIModel[] = [
     isActive: true,
     displayOrder: 1
   },
+  // Claude Models - All available models
   {
-    id: 'claude-3',
-    name: 'Claude 3',
+    id: 'claude-3-5-sonnet-20241022',
+    name: 'Claude 3.5 Sonnet (Latest)',
     provider: 'Anthropic',
     apiEndpoint: 'https://api.anthropic.com/v1/messages',
-    costPerToken: 0.025,
-    maxTokens: 4096,
+    costPerToken: 0.015,
+    maxTokens: 8192,
     isActive: true,
     displayOrder: 2
   },
+  {
+    id: 'claude-3-5-sonnet-20240620',
+    name: 'Claude 3.5 Sonnet (June)',
+    provider: 'Anthropic',
+    apiEndpoint: 'https://api.anthropic.com/v1/messages',
+    costPerToken: 0.015,
+    maxTokens: 8192,
+    isActive: true,
+    displayOrder: 3
+  },
+  {
+    id: 'claude-3-5-haiku-20241022',
+    name: 'Claude 3.5 Haiku',
+    provider: 'Anthropic',
+    apiEndpoint: 'https://api.anthropic.com/v1/messages',
+    costPerToken: 0.001,
+    maxTokens: 8192,
+    isActive: true,
+    displayOrder: 4
+  },
+  {
+    id: 'claude-3-opus-20240229',
+    name: 'Claude 3 Opus',
+    provider: 'Anthropic',
+    apiEndpoint: 'https://api.anthropic.com/v1/messages',
+    costPerToken: 0.075,
+    maxTokens: 4096,
+    isActive: true,
+    displayOrder: 5
+  },
+  {
+    id: 'claude-3-sonnet-20240229',
+    name: 'Claude 3 Sonnet',
+    provider: 'Anthropic',
+    apiEndpoint: 'https://api.anthropic.com/v1/messages',
+    costPerToken: 0.015,
+    maxTokens: 4096,
+    isActive: true,
+    displayOrder: 6
+  },
+  {
+    id: 'claude-3-haiku-20240307',
+    name: 'Claude 3 Haiku',
+    provider: 'Anthropic',
+    apiEndpoint: 'https://api.anthropic.com/v1/messages',
+    costPerToken: 0.00125,
+    maxTokens: 4096,
+    isActive: true,
+    displayOrder: 7
+  },
+  // Google Models
   {
     id: 'gemini-pro',
     name: 'Gemini Pro',
@@ -35,16 +88,16 @@ const mockModels: AIModel[] = [
     costPerToken: 0.02,
     maxTokens: 2048,
     isActive: true,
-    displayOrder: 3
+    displayOrder: 8
   }
 ];
 
 export default function Home() {
   const [selectedModels, setSelectedModels] = useState<(AIModel | null)[]>([
     mockModels[0], // GPT-4
-    mockModels[1], // Claude 3
-    mockModels[2], // Gemini Pro
-    null
+    mockModels[1], // Claude 3.5 Sonnet (Latest)
+    mockModels[4], // Claude 3 Opus
+    mockModels[7]  // Gemini Pro
   ]);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [isLoading, setIsLoading] = useState(false);

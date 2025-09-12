@@ -14,21 +14,18 @@ export async function POST(request: NextRequest) {
 
     let response;
     
-    switch (modelId) {
-      case 'claude-3':
-        response = await callClaude(message);
-        break;
-      case 'gpt-4':
-        response = await callMockAI(message, 'GPT-4');
-        break;
-      case 'gemini-pro':
-        response = await callMockAI(message, 'Gemini Pro');
-        break;
-      default:
-        return NextResponse.json(
-          { error: 'Unsupported model' },
-          { status: 400 }
-        );
+    // Check if it's a Claude model
+    if (modelId.startsWith('claude-')) {
+      response = await callClaude(message, modelId);
+    } else if (modelId === 'gpt-4') {
+      response = await callMockAI(message, 'GPT-4');
+    } else if (modelId === 'gemini-pro') {
+      response = await callMockAI(message, 'Gemini Pro');
+    } else {
+      return NextResponse.json(
+        { error: 'Unsupported model' },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json(response);
