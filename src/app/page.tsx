@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import PageLayout from '@/components/PageLayout';
 import FourPanelLayout from '@/components/FourPanelLayout';
 import UnifiedInput from '@/components/UnifiedInput';
 import { AIModel, Message } from '@/types';
@@ -187,24 +187,11 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col">
-      <header className="border-b bg-white p-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">AIくらべ</h1>
-            <p className="text-sm text-gray-600">4つのパネルで複数のAIモデルを同時に比較</p>
-          </div>
-          <div className="flex gap-4">
-            <Link href="/" className="text-gray-900 text-sm font-medium border-b-2 border-blue-600">
-              テキストAI比較
-            </Link>
-            <Link href="/image" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              画像生成AI比較
-            </Link>
-          </div>
-        </div>
-      </header>
-      
+    <PageLayout
+      title="AIくらべ"
+      subtitle="4つのパネルで複数のAIモデルを同時に比較"
+      currentPage="text"
+    >
       <FourPanelLayout
         models={mockModels}
         selectedModels={selectedModels}
@@ -217,6 +204,6 @@ export default function Home() {
         disabled={isLoading}
         activeModelCount={activeModelCount}
       />
-    </div>
+    </PageLayout>
   );
 }

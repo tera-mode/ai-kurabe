@@ -20,7 +20,7 @@ export default function ChatPanel({
   return (
     <div className="flex flex-col h-full border border-gray-200">
       {/* Header with model selector */}
-      <div className="p-3 border-b bg-gray-50">
+      <div className="px-6 py-4 border-b bg-gray-50">
         <select
           value={selectedModel?.id || ''}
           onChange={(e) => onModelSelect(e.target.value || null)}
@@ -44,7 +44,7 @@ export default function ChatPanel({
       </div>
       
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto px-6 py-4">
         {!selectedModel ? (
           <div className="text-gray-500 text-center text-sm">
             モデルを選択してください
