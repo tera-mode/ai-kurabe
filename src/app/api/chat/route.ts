@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { callClaude, callMockAI } from '@/lib/ai-services';
+import { callClaude, callGemini, callMockAI } from '@/lib/ai-services';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     } else if (modelId === 'gpt-4') {
       response = await callMockAI(message, 'GPT-4');
     } else if (modelId === 'gemini-pro') {
-      response = await callMockAI(message, 'Gemini Pro');
+      response = await callGemini(message, modelId);
     } else {
       return NextResponse.json(
         { error: 'Unsupported model' },

@@ -33,3 +33,25 @@ export interface ChatSession {
   messages: Message[];
   createdAt: Date;
 }
+
+export interface ImageModel {
+  id: string;
+  name: string;
+  provider: string;
+  apiEndpoint: string;
+  costPerImage: number;
+  maxPromptLength: number;
+  isActive: boolean;
+  displayOrder: number;
+  promptConverter: string;
+}
+
+export interface GeneratedImage {
+  id: string;
+  url: string | null;
+  prompt: string;
+  originalPrompt: string;
+  timestamp: Date;
+  modelId: string;
+  error?: string | null;
+}

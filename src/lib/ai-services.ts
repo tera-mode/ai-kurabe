@@ -1,8 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!);
 
 export interface AIResponse {
   content: string;
@@ -48,6 +51,43 @@ export async function callClaude(message: string, modelId: string): Promise<AIRe
     console.error('Claude API Error:', error);
     return {
       content: 'エラーが発生しました。Claude APIの呼び出しに失敗しました。',
+      model: modelId,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+export async function callGemini(message: string, modelId: string): Promise<AIResponse> {
+  try {
+    // Use Gemini 1.5 Flash for better rate limits in free tier
+    const actualModelId = modelId === 'gemini-pro' ? 'gemini-1.5-flash' : modelId;
+    const model = genAI.getGenerativeModel({ model: actualModelId });
+    
+    const result = await model.generateContent(message);
+    const response = await result.response;
+    const text = response.text();
+
+    return {
+      content: text,
+      model: modelId === 'gemini-pro' ? 'Gemini Pro (Flash)' : modelId,
+      tokens: undefined // Gemini doesn't provide token count in basic API
+    };
+  } catch (error) {
+    console.error('Gemini API Error:', error);
+    
+    // Handle specific error cases
+    if (error instanceof Error) {
+      if (error.message.includes('429') || error.message.includes('quota')) {
+        return {
+          content: '⚠️ Gemini APIの利用制限に達しました。しばらく待ってから再試行してください。\n\n無料プランの制限:\n- 1分間: 15回\n- 1日: 1500回\n\n有料プランにアップグレードすると制限が緩和されます。',
+          model: modelId === 'gemini-pro' ? 'Gemini Pro (Flash)' : modelId,
+          error: 'Rate limit exceeded'
+        };
+      }
+    }
+    
+    return {
+      content: 'エラーが発生しました。Gemini APIの呼び出しに失敗しました。',
       model: modelId,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
