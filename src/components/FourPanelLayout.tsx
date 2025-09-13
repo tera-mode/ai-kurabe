@@ -1,13 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AIModel, Message } from '@/types';
+import { AIModel } from '@/types';
 import ChatPanel from './ChatPanel';
+
+interface StreamMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  model?: string;
+  tokens?: number;
+  isStreaming?: boolean;
+  error?: string;
+}
 
 interface FourPanelLayoutProps {
   models: AIModel[];
   selectedModels: (AIModel | null)[];
-  messages: Record<string, Message[]>;
+  messages: Record<string, StreamMessage[]>;
   onModelSelect: (panelIndex: number, modelId: string | null) => void;
 }
 

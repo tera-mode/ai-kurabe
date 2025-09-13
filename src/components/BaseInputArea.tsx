@@ -16,7 +16,8 @@ export default function BaseInputArea({
   guideText = "上のパネルからAIモデルを選択して、下の入力欄に質問やプロンプトを入力してください" 
 }: BaseInputAreaProps) {
   return (
-    <div className="border-t bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 md:px-6 md:py-6 shadow-xl">
+    // グローバルスタイル準拠: パディング統一
+    <div className="border-t bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-3 md:px-6 md:py-6 shadow-xl">
       {/* 初回ユーザー向けガイド */}
       {showGuide && (
         <div className="mb-2 p-2 md:mb-4 md:p-4 bg-gradient-to-r from-blue-600 to-blue-700 border border-blue-400 rounded-xl shadow-lg">
@@ -27,7 +28,7 @@ export default function BaseInputArea({
           <p className="text-xs text-blue-100">{guideText}</p>
         </div>
       )}
-      
+
       {children}
     </div>
   );

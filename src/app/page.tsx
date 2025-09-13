@@ -1,11 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PageLayout from '@/components/PageLayout';
 import FourPanelLayout from '@/components/FourPanelLayout';
 import UnifiedInput from '@/components/UnifiedInput';
 import MobileHeader from '@/components/MobileHeader';
-import { AIModel, Message } from '@/types';
+import { AIModel } from '@/types';
+
+interface StreamMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  model?: string;
+  tokens?: number;
+  isStreaming?: boolean;
+  error?: string;
+}
 
 // Mock data for development
 const mockModels: AIModel[] = [
@@ -101,8 +111,9 @@ export default function Home() {
     mockModels[0], // GPT-4 - デスクトップのみ
     mockModels[7]  // Gemini Pro - デスクトップのみ
   ]);
-  const [messages, setMessages] = useState<Record<string, Message[]>>({});
+  const [messages, setMessages] = useState<Record<string, StreamMessage[]>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
 
   const handleModelSelect = (panelIndex: number, modelId: string | null) => {
     const model = modelId ? mockModels.find(m => m.id === modelId) || null : null;
@@ -135,14 +146,17 @@ export default function Home() {
   const handleSendToModels = async (content: string) => {
     if (activeModelCount === 0) return;
 
+    // Stop any ongoing streams
+    abortControllersRef.current.forEach(controller => controller.abort());
+    abortControllersRef.current.clear();
+
     setIsLoading(true);
-    
+
     // Add user message to all active models
-    const userMessage: Message = {
+    const userMessage: StreamMessage = {
       id: Date.now().toString(),
       content,
-      role: 'user',
-      timestamp: new Date()
+      role: 'user'
     };
 
     const updatedMessages = { ...messages };
@@ -154,10 +168,28 @@ export default function Home() {
     });
     setMessages(updatedMessages);
 
-    // Call AI APIs
-    const promises = activeModels.map(async (model) => {
+    // Stream AI responses in parallel
+    const streamPromises = activeModels.map(async (model) => {
+      const abortController = new AbortController();
+      abortControllersRef.current.set(model.id, abortController);
+
       try {
-        const response = await fetch('/api/chat', {
+        // Add assistant message placeholder
+        const assistantMessageId = `${Date.now()}-${model.id}-${Math.random()}`;
+        const assistantMessage: StreamMessage = {
+          id: assistantMessageId,
+          content: '',
+          role: 'assistant',
+          isStreaming: true,
+          model: model.name
+        };
+
+        setMessages(prev => ({
+          ...prev,
+          [model.id]: [...(prev[model.id] || []), assistantMessage]
+        }));
+
+        const response = await fetch('/api/chat/stream', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -165,41 +197,117 @@ export default function Home() {
           body: JSON.stringify({
             message: content,
             modelId: model.id
-          })
+          }),
+          signal: abortController.signal
         });
 
-        const data = await response.json();
-        
-        const aiMessage: Message = {
-          id: `${Date.now()}-${model.id}-${Math.random()}`,
-          content: data.error ? `エラー: ${data.error}` : data.content,
-          role: 'assistant',
-          timestamp: new Date(),
-          modelId: model.id
-        };
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        setMessages(prev => ({
-          ...prev,
-          [model.id]: [...(prev[model.id] || []), aiMessage]
-        }));
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error('Stream not supported');
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+
+          // Keep incomplete line in buffer
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.type === 'chunk') {
+                  // Append chunk to assistant message
+                  setMessages(prev => ({
+                    ...prev,
+                    [model.id]: prev[model.id].map(msg =>
+                      msg.id === assistantMessageId
+                        ? { ...msg, content: msg.content + data.content }
+                        : msg
+                    )
+                  }));
+                } else if (data.type === 'complete') {
+                  // Mark as complete
+                  setMessages(prev => ({
+                    ...prev,
+                    [model.id]: prev[model.id].map(msg =>
+                      msg.id === assistantMessageId
+                        ? {
+                            ...msg,
+                            isStreaming: false,
+                            model: data.model,
+                            tokens: data.tokens
+                          }
+                        : msg
+                    )
+                  }));
+                } else if (data.type === 'error') {
+                  // Handle error
+                  setMessages(prev => ({
+                    ...prev,
+                    [model.id]: prev[model.id].map(msg =>
+                      msg.id === assistantMessageId
+                        ? {
+                            ...msg,
+                            content: data.content,
+                            isStreaming: false,
+                            error: data.error,
+                            model: data.model
+                          }
+                        : msg
+                    )
+                  }));
+                }
+              } catch (parseError) {
+                console.error('Failed to parse SSE data:', parseError);
+              }
+            }
+          }
+        }
+
       } catch (error) {
-        const errorMessage: Message = {
-          id: `${Date.now()}-${model.id}-error`,
-          content: `エラーが発生しました: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          role: 'assistant',
-          timestamp: new Date(),
-          modelId: model.id
-        };
+        if (error instanceof Error && error.name === 'AbortError') {
+          // Request was aborted - don't show error
+          return;
+        }
 
+        console.error(`Streaming error for ${model.id}:`, error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+        // Find and update the assistant message with error
         setMessages(prev => ({
           ...prev,
-          [model.id]: [...(prev[model.id] || []), errorMessage]
+          [model.id]: prev[model.id].map(msg =>
+            msg.role === 'assistant' && msg.isStreaming
+              ? {
+                  ...msg,
+                  content: 'エラーが発生しました。再試行してください。',
+                  isStreaming: false,
+                  error: errorMessage
+                }
+              : msg
+          )
         }));
+      } finally {
+        abortControllersRef.current.delete(model.id);
       }
     });
 
-    // Wait for all API calls to complete
-    await Promise.all(promises);
+    // Wait for all streams to complete
+    await Promise.all(streamPromises);
     setIsLoading(false);
   };
 

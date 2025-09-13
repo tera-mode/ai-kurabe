@@ -45,20 +45,20 @@ export default function ImagePromptInput({
       guideText="上のパネルから画像生成AIモデルを選択して、下の入力欄に画像生成のプロンプトを入力してください"
     >
       <form onSubmit={handleSubmit}>
-        <div className="flex gap-4">
+        <div className="flex gap-3 md:gap-4">
           <div className="flex-1">
             <div className="relative">
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder={activeModelCount > 0 ? 
-                  `画像生成プロンプトを入力してください... (${activeModelCount}つのモデルで同時生成)` : 
+                  `画像生成プロンプトを入力 (${activeModelCount}モデル送信)` : 
                   "まずは上のパネルで画像生成AIモデルを選択してください"
                 }
-                className="w-full resize-none border-2 border-white/20 bg-white rounded-xl px-6 py-4 pr-20 pb-12 text-base text-slate-900
+                className="w-full resize-none border-2 border-white/20 bg-white rounded-2xl md:rounded-xl px-4 py-3 pr-14 pb-8 md:px-6 md:py-4 md:pr-20 md:pb-12 text-sm md:text-base text-slate-900
                   focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-white/20
                   placeholder:text-slate-500 transition-all duration-200 shadow-xl
-                  disabled:bg-slate-100 disabled:cursor-not-allowed backdrop-blur-sm h-[120px]"
+                  disabled:bg-slate-100 disabled:cursor-not-allowed backdrop-blur-sm h-[70px] md:h-[120px]"
                 rows={3}
                 disabled={disabled}
                 onKeyDown={(e) => {
@@ -73,22 +73,22 @@ export default function ImagePromptInput({
               <button
                 type="button"
                 onClick={() => setShowSamples(!showSamples)}
-                className="absolute bottom-4 right-4 bg-purple-500 hover:bg-purple-600 active:bg-purple-700 text-white 
-                  px-3 py-2 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg active:shadow-sm
-                  transition-all duration-150 border border-purple-400 hover:border-purple-500
+                className="absolute bottom-2 right-2 md:bottom-4 md:right-4 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white
+                  px-3 py-1.5 md:px-3 md:py-2 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg active:shadow-sm
+                  transition-all duration-150 border border-blue-400 hover:border-blue-500
                   disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed disabled:shadow-none
-                  transform hover:scale-105 active:scale-95"
+                  transform hover:scale-105 active:scale-95 touch-manipulation"
                 disabled={disabled}
                 title="人気の画像生成例を見る"
               >
-                🎨 画像例
+                🎨<span className="hidden sm:inline"> 画像例</span>
               </button>
 
               {/* サンプル一覧 - テキストエリア直上 */}
               {showSamples && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border-2 border-purple-300 
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border-2 border-blue-300
                   rounded-xl shadow-2xl p-4 z-20 max-h-64 overflow-y-auto animate-fadeIn">
-                  <div className="text-sm font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                  <div className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
                     <span className="text-lg">🎨</span>
                     人気の画像テーマをクリックして試してみましょう！
                   </div>
@@ -97,20 +97,20 @@ export default function ImagePromptInput({
                       <button
                         key={index}
                         onClick={() => handleSampleSelect(prompt)}
-                        className="w-full text-left px-4 py-3 text-sm text-slate-700 bg-gradient-to-r from-purple-50 to-pink-50
-                          hover:from-purple-100 hover:to-pink-100 rounded-lg transition-all duration-200 
-                          border border-purple-200 hover:border-purple-300 hover:shadow-md transform hover:scale-[1.02]
-                          hover:text-purple-800 font-medium"
+                        className="w-full text-left px-4 py-3 text-sm text-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50
+                          hover:from-blue-100 hover:to-indigo-100 rounded-lg transition-all duration-200
+                          border border-blue-200 hover:border-blue-300 hover:shadow-md transform hover:scale-[1.02]
+                          hover:text-blue-800 font-medium"
                       >
                         {prompt}
                       </button>
                     ))}
                   </div>
-                  <div className="mt-4 pt-3 border-t border-purple-200 text-center">
+                  <div className="mt-4 pt-3 border-t border-blue-200 text-center">
                     <button
                       onClick={() => setShowSamples(false)}
-                      className="text-sm text-purple-600 hover:text-purple-800 transition-colors font-medium
-                        px-3 py-1 rounded-md hover:bg-purple-50"
+                      className="text-sm text-blue-600 hover:text-blue-800 transition-colors font-medium
+                        px-3 py-1 rounded-md hover:bg-blue-50"
                     >
                       ✕ 閉じる
                     </button>
@@ -126,39 +126,16 @@ export default function ImagePromptInput({
                 </div>
               )}
             </div>
-            
-            {/* ステータス表示 */}
-            <div className="flex justify-between items-center mt-3">
-              <div className="flex items-center gap-4 text-xs">
-                {activeModelCount > 0 ? (
-                  <div className="flex items-center gap-1 text-green-400 font-medium">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    選択中: {activeModelCount}つのモデル
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1 text-yellow-400 font-medium">
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                    モデルを選択してください
-                  </div>
-                )}
-                <div className="text-slate-300">
-                  Shift+Enter: 改行 | Enter: 生成 | 自動プロンプト変換
-                </div>
-              </div>
-              <div className="text-xs text-slate-400">
-                {prompt.length}/1000文字
-              </div>
-            </div>
           </div>
           
           <button
             type="submit"
             disabled={disabled || !prompt.trim() || activeModelCount === 0}
-            className="px-8 h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-base font-bold
-              rounded-xl border-2 border-white/50 hover:from-blue-50 hover:to-white hover:border-white
+            className="px-4 md:px-8 h-[70px] md:h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-sm md:text-base font-bold touch-manipulation
+              rounded-2xl md:rounded-xl border-2 border-white/50 hover:from-blue-50 hover:to-white hover:border-white
               disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 disabled:border-slate-600
               transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105
-              disabled:transform-none disabled:shadow-md min-w-[120px] backdrop-blur-sm"
+              disabled:transform-none disabled:shadow-md min-w-[70px] md:min-w-[120px] backdrop-blur-sm"
           >
             {disabled ? (
               <div className="flex items-center gap-2">
