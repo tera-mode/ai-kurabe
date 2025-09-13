@@ -250,50 +250,120 @@ a:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Layout utility classes */
+/* Layout utility classes - using native CSS for Tailwind v4 compatibility */
 .page-layout {
-  @apply h-screen flex flex-col;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .page-header {
-  @apply border-b bg-white px-6 py-4;
+  display: none;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+  padding: 1rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .page-header {
+    display: block;
+  }
 }
 
 .page-header-content {
-  @apply flex justify-between items-center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .page-title {
-  @apply text-2xl font-bold text-gray-800;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .page-subtitle {
-  @apply text-sm text-gray-600;
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .nav-link {
-  @apply text-sm font-medium transition-colors duration-200;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
 .nav-link-active {
-  @apply text-gray-900 border-b-2 border-blue-600;
+  color: #111827;
+  border-bottom: 2px solid #2563eb;
 }
 
 .nav-link-inactive {
-  @apply text-blue-600 hover:text-blue-800;
+  color: #2563eb;
+}
+
+.nav-link-inactive:hover {
+  color: #1d4ed8;
+}
+
+/* Main content area with proper scrolling */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.comparison-area {
+  flex: 1;
+  min-height: 0;
+}
+
+.input-area-container {
+  flex-shrink: 0;
 }
 
 /* Panel utility classes */
 .panel-container {
-  @apply flex flex-col h-full border border-gray-200;
+  @apply flex flex-col h-full min-h-[300px] md:min-h-[500px] border-2 border-slate-300 shadow-sm hover:shadow-md transition-shadow border-b-2 border-slate-200 md:border-b-0;
 }
 
 .panel-header {
-  @apply px-6 py-4 border-b bg-gray-50;
+  @apply p-3 md:px-6 md:py-4 border-b bg-gray-50;
 }
 
 .panel-content {
-  @apply flex-1 overflow-y-auto px-6 py-4;
+  @apply flex-1 overflow-y-auto p-4 md:px-6 md:py-4;
+}
+
+.panel-select {
+  @apply w-full p-2 border border-gray-300 rounded text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50;
+}
+
+.panel-cost {
+  @apply text-xs md:text-sm text-gray-500 mt-1;
+}
+
+.panel-placeholder {
+  @apply text-gray-500 text-center text-sm h-full flex items-center justify-center;
+}
+
+.panel-error {
+  @apply bg-red-50 border-2 border-red-200 rounded-lg p-4 m-4;
+}
+
+.panel-error-content {
+  @apply flex items-center space-x-2;
+}
+
+.panel-error-text {
+  @apply text-red-800 text-sm;
+}
+
+.panel-retry-button {
+  @apply mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm;
 }
 
 /* Input area utility classes */
@@ -318,10 +388,10 @@ a:hover {
 }
 
 .input-textarea {
-  @apply w-full resize-none border-2 border-white/20 bg-white rounded-xl px-6 py-4 text-base text-slate-900
+  @apply w-full resize-none border-2 border-white/20 bg-white rounded-xl px-6 py-4 pr-20 pb-12 text-base text-slate-900
     focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-white/20
     placeholder:text-slate-500 transition-all duration-200 shadow-xl
-    disabled:bg-slate-100 disabled:cursor-not-allowed backdrop-blur-sm;
+    disabled:bg-slate-100 disabled:cursor-not-allowed backdrop-blur-sm h-[80px] md:h-[120px];
 }
 
 .input-status {
@@ -329,11 +399,11 @@ a:hover {
 }
 
 .input-button {
-  @apply px-8 h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-base font-bold
+  @apply px-4 md:px-8 h-[80px] md:h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-sm md:text-base font-bold touch-manipulation
     rounded-xl border-2 border-white/50 hover:from-blue-50 hover:to-white hover:border-white
     disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 disabled:border-slate-600
     transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105
-    disabled:transform-none disabled:shadow-md min-w-[120px] backdrop-blur-sm;
+    disabled:transform-none disabled:shadow-md min-w-[80px] md:min-w-[120px] backdrop-blur-sm;
 }
 
 .status-indicator {

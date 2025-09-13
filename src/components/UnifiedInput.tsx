@@ -38,20 +38,20 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
   return (
     <BaseInputArea showGuide={activeModelCount === 0}>
       <form onSubmit={handleSubmit}>
-        <div className="flex gap-4">
+        <div className="flex gap-3 md:gap-4">
           <div className="flex-1">
             <div className="relative">
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={activeModelCount > 0 ? 
-                  `質問やプロンプトを入力してください... (${activeModelCount}つのモデルに同時送信)` : 
-                  "まずは上のパネルでAIモデルを選択してください"
+                  `質問を入力（${activeModelCount}モデル送信）` : 
+                  "モデルを選択"
                 }
-                className="w-full resize-none border-2 border-white/20 bg-white rounded-xl px-6 py-4 pr-20 pb-12 text-base text-slate-900
+                className="w-full resize-none border-2 border-white/20 bg-white rounded-xl px-4 py-3 pr-16 pb-8 md:px-6 md:py-4 md:pr-20 md:pb-12 text-sm md:text-base text-slate-900
                   focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-white/20
                   placeholder:text-slate-500 transition-all duration-200 shadow-xl
-                  disabled:bg-slate-100 disabled:cursor-not-allowed backdrop-blur-sm h-[120px]"
+                  disabled:bg-slate-100 disabled:cursor-not-allowed backdrop-blur-sm h-[70px] md:h-[120px]"
                 rows={3}
                 disabled={disabled}
                 onKeyDown={(e) => {
@@ -66,15 +66,15 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
               <button
                 type="button"
                 onClick={() => setShowSamples(!showSamples)}
-                className="absolute bottom-4 right-4 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white 
-                  px-3 py-2 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg active:shadow-sm
+                className="absolute bottom-2 right-2 md:bottom-4 md:right-4 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white 
+                  px-2 py-1 md:px-3 md:py-2 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg active:shadow-sm
                   transition-all duration-150 border border-blue-400 hover:border-blue-500
                   disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed disabled:shadow-none
                   transform hover:scale-105 active:scale-95"
                 disabled={disabled}
                 title="よく使われる質問例を見る"
               >
-                💡 質問例
+                💡<span className="hidden sm:inline"> 質問例</span>
               </button>
 
               {/* サンプル一覧 - テキストエリア直上 */}
@@ -121,25 +121,25 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
             </div>
             
             {/* ステータス表示 */}
-            <div className="flex justify-between items-center mt-3">
-              <div className="flex items-center gap-4 text-xs">
+            <div className="flex justify-between items-center mt-1 md:mt-2">
+              <div className="flex items-center gap-1 md:gap-2 text-xs">
                 {activeModelCount > 0 ? (
                   <div className="flex items-center gap-1 text-green-400 font-medium">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    選択中: {activeModelCount}つのモデル
+                    <span className="hidden sm:inline">選択中: </span>{activeModelCount}モデル
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 text-yellow-400 font-medium">
                     <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                    モデルを選択してください
+                    <span className="hidden sm:inline">モデルを</span>選択
                   </div>
                 )}
-                <div className="text-slate-300">
+                <div className="text-slate-300 hidden lg:block">
                   Shift+Enter: 改行 | Enter: 送信
                 </div>
               </div>
               <div className="text-xs text-slate-400">
-                {message.length}/2000文字
+                <span className="hidden sm:inline">{message.length}/</span>2000
               </div>
             </div>
           </div>
@@ -147,11 +147,11 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
           <button
             type="submit"
             disabled={disabled || !message.trim() || activeModelCount === 0}
-            className="px-8 h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-base font-bold
+            className="px-3 md:px-8 h-[70px] md:h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-sm md:text-base font-bold touch-manipulation
               rounded-xl border-2 border-white/50 hover:from-blue-50 hover:to-white hover:border-white
               disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 disabled:border-slate-600
               transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105
-              disabled:transform-none disabled:shadow-md min-w-[120px] backdrop-blur-sm"
+              disabled:transform-none disabled:shadow-md min-w-[70px] md:min-w-[120px] backdrop-blur-sm"
           >
             {disabled ? (
               <div className="flex items-center gap-2">

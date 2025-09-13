@@ -4,6 +4,7 @@ import { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import ImageComparisonLayout from '@/components/ImageComparisonLayout';
 import ImagePromptInput from '@/components/ImagePromptInput';
+import MobileHeader from '@/components/MobileHeader';
 import { ImageModel, GeneratedImage } from '@/types';
 
 const imageModels: ImageModel[] = [
@@ -119,23 +120,30 @@ export default function ImageComparison() {
   };
 
   return (
-    <PageLayout
-      title="画像生成AI比較"
-      subtitle="複数の画像生成AIモデルを同時に比較"
-      currentPage="image"
-    >
-      <ImageComparisonLayout
-        models={imageModels}
-        selectedModels={selectedModels}
-        images={images}
-        onModelSelect={handleModelSelect}
-      />
-      
-      <ImagePromptInput
-        onGenerate={handleGenerateImages}
-        disabled={isLoading}
-        activeModelCount={activeModelCount}
-      />
-    </PageLayout>
+    <>
+      <MobileHeader />
+      <PageLayout
+        title="画像生成AI比較"
+        subtitle="複数の画像生成AIモデルを同時に比較"
+        currentPage="image"
+      >
+        <div className="flex-1 min-h-0">
+          <ImageComparisonLayout
+            models={imageModels}
+            selectedModels={selectedModels}
+            images={images}
+            onModelSelect={handleModelSelect}
+          />
+        </div>
+        
+        <div className="flex-shrink-0">
+          <ImagePromptInput
+            onGenerate={handleGenerateImages}
+            disabled={isLoading}
+            activeModelCount={activeModelCount}
+          />
+        </div>
+      </PageLayout>
+    </>
   );
 }

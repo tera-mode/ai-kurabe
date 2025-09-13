@@ -17,7 +17,7 @@ export default function ImageComparisonLayout({
   onModelSelect
 }: ImageComparisonLayoutProps) {
   return (
-    <div className="flex-1 grid grid-cols-2 gap-0 min-h-0">
+    <div className="h-full grid grid-cols-1 md:grid-cols-2 gap-0 overflow-hidden">
       {selectedModels.map((model, index) => (
         <ImagePanel
           key={index}

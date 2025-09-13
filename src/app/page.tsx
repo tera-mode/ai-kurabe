@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import FourPanelLayout from '@/components/FourPanelLayout';
 import UnifiedInput from '@/components/UnifiedInput';
+import MobileHeader from '@/components/MobileHeader';
 import { AIModel, Message } from '@/types';
 
 // Mock data for development
@@ -95,10 +96,10 @@ const mockModels: AIModel[] = [
 
 export default function Home() {
   const [selectedModels, setSelectedModels] = useState<(AIModel | null)[]>([
-    mockModels[0], // GPT-4
-    mockModels[1], // Claude 3.5 Sonnet (Latest)
-    mockModels[4], // Claude 3 Opus
-    mockModels[7]  // Gemini Pro
+    mockModels[1], // Claude 3.5 Sonnet (Latest) - モバイルでも表示
+    mockModels[4], // Claude 3 Opus - モバイルでも表示
+    mockModels[0], // GPT-4 - デスクトップのみ
+    mockModels[7]  // Gemini Pro - デスクトップのみ
   ]);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -112,7 +113,23 @@ export default function Home() {
     });
   };
 
-  const activeModels = selectedModels.filter(model => model !== null) as AIModel[];
+  const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Calculate active models based on screen size
+  const visibleModels = !isMounted || isMobile ? selectedModels.slice(0, 2) : selectedModels;
+  const activeModels = visibleModels.filter(model => model !== null) as AIModel[];
   const activeModelCount = activeModels.length;
 
   const handleSendToModels = async (content: string) => {
@@ -187,23 +204,30 @@ export default function Home() {
   };
 
   return (
-    <PageLayout
-      title="AIくらべ"
-      subtitle="4つのパネルで複数のAIモデルを同時に比較"
-      currentPage="text"
-    >
-      <FourPanelLayout
-        models={mockModels}
-        selectedModels={selectedModels}
-        messages={messages}
-        onModelSelect={handleModelSelect}
-      />
-      
-      <UnifiedInput
-        onSend={handleSendToModels}
-        disabled={isLoading}
-        activeModelCount={activeModelCount}
-      />
-    </PageLayout>
+    <>
+      <MobileHeader />
+      <PageLayout
+        title="AIくらべ"
+        subtitle="複数のAIモデルを同時に比較"
+        currentPage="text"
+      >
+        <div className="flex-1 min-h-0">
+          <FourPanelLayout
+            models={mockModels}
+            selectedModels={selectedModels}
+            messages={messages}
+            onModelSelect={handleModelSelect}
+          />
+        </div>
+        
+        <div className="flex-shrink-0">
+          <UnifiedInput
+            onSend={handleSendToModels}
+            disabled={isLoading}
+            activeModelCount={activeModelCount}
+          />
+        </div>
+      </PageLayout>
+    </>
   );
 }
