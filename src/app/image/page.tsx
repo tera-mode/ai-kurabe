@@ -5,6 +5,8 @@ import PageLayout from '@/components/PageLayout';
 import ImageComparisonLayout from '@/components/ImageComparisonLayout';
 import ImagePromptInput from '@/components/ImagePromptInput';
 import MobileHeader from '@/components/MobileHeader';
+import { useAuth } from '@/hooks/useAuth';
+import { getAuth } from 'firebase/auth';
 import { ImageModel, GeneratedImage } from '@/types';
 
 const imageModels: ImageModel[] = [
@@ -44,12 +46,23 @@ const imageModels: ImageModel[] = [
 ];
 
 export default function ImageComparison() {
+  const { user, signOut, refreshUserData } = useAuth();
   const [selectedModels, setSelectedModels] = useState<(ImageModel | null)[]>([
     imageModels[0], // Gemini 2.5 Flash Image
     imageModels[1]  // Google Imagen 4
   ]);
   const [images, setImages] = useState<Record<string, GeneratedImage[]>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // Clear images after logout
+      setImages({});
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const handleModelSelect = (panelIndex: number, modelId: string | null) => {
     const model = modelId ? imageModels.find(m => m.id === modelId) || null : null;
@@ -67,7 +80,21 @@ export default function ImageComparison() {
     if (activeModelCount === 0) return;
 
     setIsLoading(true);
-    
+
+    // Get ID token for authenticated users
+    let idToken: string | undefined;
+    try {
+      if (user) {
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          idToken = await currentUser.getIdToken();
+        }
+      }
+    } catch (authError) {
+      console.log('User not authenticated, continuing without diamond consumption');
+    }
+
     const promises = activeModels.map(async (model) => {
       try {
         const response = await fetch('/api/image-generate', {
@@ -77,7 +104,8 @@ export default function ImageComparison() {
           },
           body: JSON.stringify({
             prompt,
-            modelId: model.id
+            modelId: model.id,
+            idToken
           })
         });
 
@@ -116,12 +144,19 @@ export default function ImageComparison() {
     });
 
     await Promise.all(promises);
+
+    // Refresh user data to get updated diamond balance
+    if (user) {
+      refreshUserData();
+    }
+
     setIsLoading(false);
   };
 
   return (
     <>
       <MobileHeader />
+
       <PageLayout
         title="画像生成AI比較"
         subtitle="複数の画像生成AIモデルを同時に比較"

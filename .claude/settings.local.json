@@ -21,7 +21,9 @@
       "Bash(findstr:*)",
       "Bash(npx vercel:*)",
       "Bash(cmd /c:*)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "WebFetch(domain:chatplayground.ai)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

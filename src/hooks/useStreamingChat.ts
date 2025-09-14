@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { getAuth } from 'firebase/auth';
 
 interface StreamChunk {
   content: string;
@@ -86,12 +87,24 @@ export function useStreamingChat(): UseStreamingChatReturn {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
+      // Get ID token for authenticated users
+      let idToken: string | undefined;
+      try {
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          idToken = await currentUser.getIdToken();
+        }
+      } catch (authError) {
+        console.log('User not authenticated, continuing without diamond consumption');
+      }
+
       const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message, modelId }),
+        body: JSON.stringify({ message, modelId, idToken }),
         signal: abortController.signal
       });
 

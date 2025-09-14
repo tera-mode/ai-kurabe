@@ -21,6 +21,137 @@ function sendSSEMessage(controller: ReadableStreamDefaultController, data: Strea
   );
 }
 
+// Token tracking version that returns total tokens used
+export async function callClaudeStreamWithTokenTracking(
+  message: string,
+  modelId: string,
+  controller: ReadableStreamDefaultController
+): Promise<number> {
+  const modelDisplayNames: Record<string, string> = {
+    'claude-3-5-sonnet-20241022': 'Claude 3.5 Sonnet (Latest)',
+    'claude-3-5-sonnet-20240620': 'Claude 3.5 Sonnet (June)',
+    'claude-3-5-haiku-20241022': 'Claude 3.5 Haiku',
+    'claude-3-opus-20240229': 'Claude 3 Opus',
+    'claude-3-sonnet-20240229': 'Claude 3 Sonnet',
+    'claude-3-haiku-20240307': 'Claude 3 Haiku',
+  };
+
+  try {
+    const stream = await anthropic.messages.create({
+      model: modelId,
+      max_tokens: 4000,
+      messages: [{
+        role: 'user',
+        content: message
+      }],
+      stream: true,
+    });
+
+    let fullContent = '';
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    for await (const chunk of stream) {
+      if (chunk.type === 'message_start') {
+        // Get input tokens from message start
+        if (chunk.message.usage) {
+          inputTokens = chunk.message.usage.input_tokens || 0;
+        }
+      } else if (chunk.type === 'content_block_delta') {
+        if (chunk.delta.type === 'text_delta') {
+          const text = chunk.delta.text;
+          fullContent += text;
+
+          // Send each character chunk for typing animation
+          sendSSEMessage(controller, {
+            content: text,
+            model: modelDisplayNames[modelId] || modelId,
+            type: 'chunk'
+          });
+
+          // Small delay for typing effect
+          await new Promise(resolve => setTimeout(resolve, 20));
+        }
+      } else if (chunk.type === 'message_delta') {
+        if (chunk.usage) {
+          outputTokens = chunk.usage.output_tokens || 0;
+        }
+      }
+    }
+
+    const totalTokens = inputTokens + outputTokens;
+
+    // Send completion message
+    sendSSEMessage(controller, {
+      content: fullContent,
+      model: modelDisplayNames[modelId] || modelId,
+      type: 'complete',
+      tokens: totalTokens
+    });
+
+    console.log(`[CLAUDE_STREAM] Tokens used - Input: ${inputTokens}, Output: ${outputTokens}, Total: ${totalTokens}`);
+    return totalTokens;
+
+  } catch (error) {
+    console.error('Claude Stream Error:', error);
+
+    // Fallback to non-streaming API if streaming fails
+    try {
+      console.log('Attempting fallback to non-streaming Claude API...');
+      const response = await anthropic.messages.create({
+        model: modelId,
+        max_tokens: 4000,
+        messages: [{
+          role: 'user',
+          content: message
+        }]
+      });
+
+      const content = response.content[0];
+      if (content.type === 'text') {
+        // Simulate typing animation for fallback
+        const text = content.text;
+        let currentText = '';
+
+        for (let i = 0; i < text.length; i++) {
+          currentText += text[i];
+          sendSSEMessage(controller, {
+            content: text[i],
+            model: modelDisplayNames[modelId] || modelId,
+            type: 'chunk'
+          });
+
+          // Faster typing for fallback
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+
+        const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
+
+        sendSSEMessage(controller, {
+          content: text,
+          model: modelDisplayNames[modelId] || modelId,
+          type: 'complete',
+          tokens: totalTokens
+        });
+
+        console.log(`[CLAUDE_FALLBACK] Tokens used - Input: ${response.usage.input_tokens}, Output: ${response.usage.output_tokens}, Total: ${totalTokens}`);
+        return totalTokens;
+      }
+    } catch (fallbackError) {
+      console.error('Claude Fallback Error:', fallbackError);
+      sendSSEMessage(controller, {
+        content: 'エラーが発生しました。Claude APIの呼び出しに失敗しました。',
+        model: modelDisplayNames[modelId] || modelId,
+        type: 'error',
+        error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
+      });
+    }
+
+    // Return estimated tokens if all fails
+    return Math.ceil(message.length / 4) * 2; // Rough estimation
+  }
+}
+
 export async function callClaudeStream(
   message: string,
   modelId: string,
@@ -128,6 +259,111 @@ export async function callClaudeStream(
         type: 'error',
         error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
       });
+    }
+  }
+}
+
+// Token tracking version for Gemini
+export async function callGeminiStreamWithTokenTracking(
+  message: string,
+  modelId: string,
+  controller: ReadableStreamDefaultController
+): Promise<number> {
+  const actualModelId = modelId === 'gemini-pro' ? 'gemini-1.5-flash' : modelId;
+  const displayModel = modelId === 'gemini-pro' ? 'Gemini Pro (Flash)' : modelId;
+  try {
+    const model = genAI.getGenerativeModel({ model: actualModelId });
+    const result = await model.generateContentStream(message);
+    let fullContent = '';
+
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      fullContent += chunkText;
+      // Send each chunk for typing animation
+      sendSSEMessage(controller, {
+        content: chunkText,
+        model: displayModel,
+        type: 'chunk'
+      });
+      // Small delay for typing effect
+      await new Promise(resolve => setTimeout(resolve, 30));
+    }
+
+    // Get final response to access usage metadata
+    const response = await result.response;
+    const totalTokens = response.usageMetadata ?
+      (response.usageMetadata.promptTokenCount || 0) + (response.usageMetadata.candidatesTokenCount || 0) :
+      Math.ceil(message.length / 4) + Math.ceil(fullContent.length / 4);
+
+    // Send completion message
+    sendSSEMessage(controller, {
+      content: fullContent,
+      model: displayModel,
+      type: 'complete',
+      tokens: totalTokens
+    });
+
+    console.log(`[GEMINI_STREAM] Tokens used - Total: ${totalTokens}, Input: ${response.usageMetadata?.promptTokenCount || 'unknown'}, Output: ${response.usageMetadata?.candidatesTokenCount || 'unknown'}`);
+    return totalTokens;
+
+  } catch (error) {
+    console.error('Gemini Stream Error:', error);
+    // Handle rate limiting first
+    if (error instanceof Error && (error.message.includes('429') || error.message.includes('quota'))) {
+      sendSSEMessage(controller, {
+        content: '⚠️ Gemini APIの利用制限に達しました。しばらく待ってから再試行してください。\n\n無料プランの制限:\n- 1分間: 15回\n- 1日: 1500回\n\n有料プランにアップグレードすると制限が緩和されます。',
+        model: displayModel,
+        type: 'error',
+        error: 'Rate limit exceeded'
+      });
+      return Math.ceil(message.length / 4) * 2; // Return estimated tokens
+    }
+
+    // Fallback to non-streaming API if streaming fails
+    try {
+      console.log('Attempting fallback to non-streaming Gemini API...');
+      const model = genAI.getGenerativeModel({ model: actualModelId });
+      const result = await model.generateContent(message);
+      const response = await result.response;
+      const text = response.text();
+
+      const totalTokens = response.usageMetadata ?
+        (response.usageMetadata.promptTokenCount || 0) + (response.usageMetadata.candidatesTokenCount || 0) :
+        Math.ceil(message.length / 4) + Math.ceil(text.length / 4);
+
+      // Simulate typing animation for fallback
+      let currentText = '';
+      for (let i = 0; i < text.length; i++) {
+        currentText += text[i];
+        sendSSEMessage(controller, {
+          content: text[i],
+          model: displayModel,
+          type: 'chunk'
+        });
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      sendSSEMessage(controller, {
+        content: text,
+        model: displayModel,
+        type: 'complete',
+        tokens: totalTokens
+      });
+
+      console.log(`[GEMINI_FALLBACK] Tokens used - Total: ${totalTokens}`);
+      return totalTokens;
+
+    } catch (fallbackError) {
+      console.error('Gemini Fallback Error:', fallbackError);
+      sendSSEMessage(controller, {
+        content: 'エラーが発生しました。Gemini APIの呼び出しに失敗しました。',
+        model: displayModel,
+        type: 'error',
+        error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
+      });
+
+      // Return estimated tokens if all fails
+      return Math.ceil(message.length / 4) * 2;
     }
   }
 }

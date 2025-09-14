@@ -5,6 +5,8 @@ import PageLayout from '@/components/PageLayout';
 import FourPanelLayout from '@/components/FourPanelLayout';
 import UnifiedInput from '@/components/UnifiedInput';
 import MobileHeader from '@/components/MobileHeader';
+import { useAuth } from '@/hooks/useAuth';
+import { getAuth } from 'firebase/auth';
 import { AIModel } from '@/types';
 
 interface StreamMessage {
@@ -105,6 +107,7 @@ const mockModels: AIModel[] = [
 ];
 
 export default function Home() {
+  const { user, signOut, refreshUserData } = useAuth();
   const [selectedModels, setSelectedModels] = useState<(AIModel | null)[]>([
     mockModels[1], // Claude 3.5 Sonnet (Latest) - モバイルでも表示
     mockModels[4], // Claude 3 Opus - モバイルでも表示
@@ -114,6 +117,16 @@ export default function Home() {
   const [messages, setMessages] = useState<Record<string, StreamMessage[]>>({});
   const [isLoading, setIsLoading] = useState(false);
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // Clear messages after logout
+      setMessages({});
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const handleModelSelect = (panelIndex: number, modelId: string | null) => {
     const model = modelId ? mockModels.find(m => m.id === modelId) || null : null;
@@ -189,6 +202,20 @@ export default function Home() {
           [model.id]: [...(prev[model.id] || []), assistantMessage]
         }));
 
+        // Get ID token for authenticated users
+        let idToken: string | undefined;
+        try {
+          if (user) {
+            const auth = getAuth();
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+              idToken = await currentUser.getIdToken();
+            }
+          }
+        } catch (authError) {
+          console.log('User not authenticated, continuing without diamond consumption');
+        }
+
         const response = await fetch('/api/chat/stream', {
           method: 'POST',
           headers: {
@@ -196,7 +223,8 @@ export default function Home() {
           },
           body: JSON.stringify({
             message: content,
-            modelId: model.id
+            modelId: model.id,
+            idToken
           }),
           signal: abortController.signal
         });
@@ -254,6 +282,11 @@ export default function Home() {
                         : msg
                     )
                   }));
+
+                  // Refresh user data to get updated diamond balance
+                  if (user) {
+                    refreshUserData();
+                  }
                 } else if (data.type === 'error') {
                   // Handle error
                   setMessages(prev => ({
@@ -314,6 +347,7 @@ export default function Home() {
   return (
     <>
       <MobileHeader />
+
       <PageLayout
         title="AIくらべ"
         subtitle="複数のAIモデルを同時に比較"

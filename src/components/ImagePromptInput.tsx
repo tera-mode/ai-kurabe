@@ -2,6 +2,11 @@
 
 import { useState, FormEvent } from 'react';
 import BaseInputArea from './BaseInputArea';
+import { useAuth } from '@/hooks/useAuth';
+import { useUsageLimit } from '@/hooks/useUsageLimit';
+import LoginModal from '@/components/auth/LoginModal';
+import UsageLimitModal from '@/components/modals/UsageLimitModal';
+import { UsageLimit } from '@/types';
 
 interface ImagePromptInputProps {
   onGenerate: (prompt: string) => void;
@@ -16,6 +21,12 @@ export default function ImagePromptInput({
 }: ImagePromptInputProps) {
   const [prompt, setPrompt] = useState('');
   const [showSamples, setShowSamples] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showUsageLimitModal, setShowUsageLimitModal] = useState(false);
+  const [currentUsageLimit, setCurrentUsageLimit] = useState<UsageLimit | null>(null);
+
+  const { user } = useAuth();
+  const { checkUsageLimit, updateUsageForFreeUser } = useUsageLimit();
 
   const samplePrompts = [
     "美しい夕焼けの海辺、波が砂浜に打ち寄せる風景",
@@ -26,12 +37,32 @@ export default function ImagePromptInput({
     "スチームパンクなロボットが作業する工場の内部"
   ];
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (prompt.trim() && activeModelCount > 0 && !disabled) {
-      onGenerate(prompt.trim());
-      setPrompt('');
+    if (!prompt.trim() || disabled || activeModelCount === 0) return;
+
+    // 認証チェック
+    if (!user) {
+      setShowLoginModal(true);
+      return;
     }
+
+    // 利用制限チェック（画像生成は推定1画像）
+    const usageLimit = await checkUsageLimit(undefined, 1);
+    if (!usageLimit.canUse) {
+      setCurrentUsageLimit(usageLimit);
+      setShowUsageLimitModal(true);
+      return;
+    }
+
+    // 無料ユーザーの場合、最終利用日を更新
+    if (user.membershipType === 'free') {
+      await updateUsageForFreeUser();
+    }
+
+    // 実際の生成処理
+    onGenerate(prompt.trim());
+    setPrompt('');
   };
 
   const handleSampleSelect = (sampleText: string) => {
@@ -40,6 +71,7 @@ export default function ImagePromptInput({
   };
 
   return (
+    <>
     <BaseInputArea 
       showGuide={activeModelCount === 0}
       guideText="上のパネルから画像生成AIモデルを選択して、下の入力欄に画像生成のプロンプトを入力してください"
@@ -155,5 +187,19 @@ export default function ImagePromptInput({
       </form>
 
     </BaseInputArea>
+    {/* モーダル */}
+    <LoginModal
+      isOpen={showLoginModal}
+      onClose={() => setShowLoginModal(false)}
+      canClose={false}
+    />
+    {currentUsageLimit && (
+      <UsageLimitModal
+        isOpen={showUsageLimitModal}
+        onClose={() => setShowUsageLimitModal(false)}
+        usageLimit={currentUsageLimit}
+      />
+    )}
+    </>
   );
 }

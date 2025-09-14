@@ -1,15 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convertPrompt } from '@/lib/prompt-converter';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeApp, getApps } from 'firebase-admin/app';
+import { credential } from 'firebase-admin';
+import { calculateImageDiamonds } from '@/types';
+
+if (!getApps().length) {
+  const serviceAccountKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
+  initializeApp({
+    credential: credential.cert(serviceAccountKey),
+  });
+}
+
+const db = getFirestore();
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, modelId } = await request.json();
+    const { prompt, modelId, idToken } = await request.json();
+    console.log(`[IMAGE_GENERATE] Received request - model: ${modelId}, hasIdToken: ${!!idToken}`);
 
     if (!prompt || !modelId) {
       return NextResponse.json(
         { error: 'プロンプトとモデルIDが必要です' },
         { status: 400 }
       );
+    }
+
+    // 認証済みユーザーの場合、ダイヤチェック・消費を実行
+    let userId: string | null = null;
+
+    if (idToken) {
+      try {
+        console.log('[IMAGE_GENERATE] Attempting to verify ID token...');
+        const decodedToken = await getAuth().verifyIdToken(idToken);
+        userId = decodedToken.uid;
+        console.log(`[IMAGE_GENERATE] Token verified successfully, userId: ${userId}`);
+
+        // ダイヤ数を計算
+        const requiredDiamonds = calculateImageDiamonds(modelId);
+
+        // ユーザーの現在のダイヤ数をチェック
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data()!;
+          const currentDiamonds = userData.diamonds || 0;
+
+          if (currentDiamonds < requiredDiamonds) {
+            return NextResponse.json({
+              error: `ダイヤが不足しています。必要: ${requiredDiamonds}、現在: ${currentDiamonds}`,
+              code: 'INSUFFICIENT_DIAMONDS'
+            }, { status: 400 });
+          }
+        }
+      } catch (authError) {
+        console.error('Auth error in image generate API:', authError);
+        // 認証エラーでも継続（匿名ユーザーとして扱う）
+        userId = null;
+      }
     }
 
     // Convert prompt using Claude 3 Haiku
@@ -46,6 +94,58 @@ export async function POST(request: NextRequest) {
       }
     } catch (genError) {
       error = genError instanceof Error ? genError.message : 'Unknown generation error';
+    }
+
+    // AI生成完了後、認証済みユーザーのダイヤを消費
+    if (userId && imageUrl) {
+      try {
+        const requiredDiamonds = calculateImageDiamonds(modelId);
+        console.log(`[IMAGE_GENERATE] Image generation completed, consuming diamonds. userId: ${userId}, modelId: ${modelId}, requiredDiamonds: ${requiredDiamonds}`);
+
+        await db.runTransaction(async (transaction) => {
+          const userRef = db.collection('users').doc(userId);
+          const userDoc = await transaction.get(userRef);
+
+          if (userDoc.exists) {
+            const userData = userDoc.data()!;
+            const currentDiamonds = userData.diamonds || 0;
+            const newDiamonds = currentDiamonds - requiredDiamonds;
+
+            // ユーザーダイヤ更新
+            transaction.update(userRef, {
+              diamonds: Math.max(0, newDiamonds),
+              updatedAt: new Date(),
+              [`monthlyUsage.imagesGenerated`]: (userData.monthlyUsage?.imagesGenerated || 0) + 1,
+              [`totalUsage.imagesGenerated`]: (userData.totalUsage?.imagesGenerated || 0) + 1,
+            });
+
+            // 消費ログ記録
+            const logRef = db.collection('diamond_usage_logs').doc();
+            transaction.set(logRef, {
+              userId,
+              modelId,
+              actionType: 'image',
+              diamondsConsumed: requiredDiamonds,
+              diamondsBefore: currentDiamonds,
+              diamondsAfter: Math.max(0, newDiamonds),
+              metadata: {
+                imageGenerated: 1,
+                promptLength: prompt.length,
+                convertedPromptLength: convertedPrompt?.length || 0,
+                success: true,
+                imageUrl: imageUrl ? 'generated' : 'failed'
+              },
+              timestamp: new Date(),
+              userAgent: request.headers.get('user-agent') || '',
+              ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '',
+            });
+
+            console.log(`[DIAMOND_CONSUME] User: ${userId}, Model: ${modelId}, Consumed: ${requiredDiamonds}, Remaining: ${Math.max(0, newDiamonds)}`);
+          }
+        });
+      } catch (consumeError) {
+        console.error('Diamond consumption error in image generation:', consumeError);
+      }
     }
 
     return NextResponse.json({

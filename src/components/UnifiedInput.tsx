@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import BaseInputArea from './BaseInputArea';
+import { useAuth } from '@/hooks/useAuth';
+import { useUsageLimit } from '@/hooks/useUsageLimit';
+import LoginModal from '@/components/auth/LoginModal';
+import UsageLimitModal from '@/components/modals/UsageLimitModal';
+import { UsageLimit } from '@/types';
 
 interface UnifiedInputProps {
   onSend: (message: string) => void;
@@ -12,6 +17,12 @@ interface UnifiedInputProps {
 export default function UnifiedInput({ onSend, disabled = false, activeModelCount = 0 }: UnifiedInputProps) {
   const [message, setMessage] = useState('');
   const [showSamples, setShowSamples] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showUsageLimitModal, setShowUsageLimitModal] = useState(false);
+  const [currentUsageLimit, setCurrentUsageLimit] = useState<UsageLimit | null>(null);
+
+  const { user } = useAuth();
+  const { checkUsageLimit, updateUsageForFreeUser } = useUsageLimit();
 
   const samplePrompts = [
     "JavaScript でソートアルゴリズムを実装する方法を教えて",
@@ -22,12 +33,32 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
     "APIの設計原則とベストプラクティスを教えて"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() && !disabled) {
-      onSend(message.trim());
-      setMessage('');
+    if (!message.trim() || disabled || activeModelCount === 0) return;
+
+    // 認証チェック
+    if (!user) {
+      setShowLoginModal(true);
+      return;
     }
+
+    // 利用制限チェック
+    const usageLimit = await checkUsageLimit();
+    if (!usageLimit.canUse) {
+      setCurrentUsageLimit(usageLimit);
+      setShowUsageLimitModal(true);
+      return;
+    }
+
+    // 無料ユーザーの場合、最終利用日を更新
+    if (user.membershipType === 'free') {
+      await updateUsageForFreeUser();
+    }
+
+    // 実際の送信処理
+    onSend(message.trim());
+    setMessage('');
   };
 
   const handleSampleSelect = (sampleText: string) => {
@@ -36,6 +67,7 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
   };
 
   return (
+    <>
     <BaseInputArea showGuide={activeModelCount === 0}>
       <form onSubmit={handleSubmit}>
         {/* グローバルスタイル準拠: ギャップ統一 */}
@@ -151,5 +183,19 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
       </form>
 
     </BaseInputArea>
+    {/* モーダル */}
+    <LoginModal
+      isOpen={showLoginModal}
+      onClose={() => setShowLoginModal(false)}
+      canClose={false}
+    />
+    {currentUsageLimit && (
+      <UsageLimitModal
+        isOpen={showUsageLimitModal}
+        onClose={() => setShowUsageLimitModal(false)}
+        usageLimit={currentUsageLimit}
+      />
+    )}
+    </>
   );
 }
