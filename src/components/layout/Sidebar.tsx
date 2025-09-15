@@ -29,9 +29,11 @@ export default function Sidebar() {
       {/* ロゴ・ブランド */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-700">
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">AI</span>
-          </div>
+          <img
+            src="/image/aikurabe_logo.png"
+            alt="AIくらべ ロゴ"
+            className="w-8 h-8 object-contain"
+          />
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
             AIくらべ
           </h1>

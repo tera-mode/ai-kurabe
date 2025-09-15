@@ -16,6 +16,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AIくらべ - AI比較プラットフォーム",
   description: "複数のAIモデルを同時に比較できるプラットフォーム",
+  icons: {
+    icon: [
+      { url: "/image/aikurabe_fav.png", sizes: "32x32", type: "image/png" },
+      { url: "/image/aikurabe_fav.png", sizes: "16x16", type: "image/png" },
+    ],
+    shortcut: "/image/aikurabe_fav.png",
+    apple: "/image/aikurabe_fav.png",
+  },
 };
 
 export default function RootLayout({
