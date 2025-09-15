@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+import LoginModal from '@/components/auth/LoginModal';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -14,20 +16,33 @@ interface MobileMenuItem {
   label: string;
   path: string;
   divider?: boolean;
+  onClick?: () => void;
 }
-
-const mobileMenuItems: MobileMenuItem[] = [
-  { icon: '⚖️', label: 'テキスト比較', path: '/' },
-  { icon: '🖼️', label: '画像生成比較', path: '/image' },
-  { divider: true, icon: '', label: '', path: '' },
-  { icon: '👤', label: 'アカウント', path: '/account' },
-  { icon: '💰', label: '価格', path: '/pricing' },
-  { icon: '⚙️', label: '設定', path: '/settings' }
-];
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const loggedInMenuItems: MobileMenuItem[] = [
+    { icon: '⚖️', label: 'テキスト比較', path: '/' },
+    { icon: '🖼️', label: '画像生成比較', path: '/image' },
+    { divider: true, icon: '', label: '', path: '' },
+    { icon: '👤', label: 'アカウント', path: '/account' },
+    { icon: '💰', label: '価格', path: '/pricing' },
+    { icon: '⚙️', label: '設定', path: '/settings' }
+  ];
+
+  const guestMenuItems: MobileMenuItem[] = [
+    { icon: '⚖️', label: 'テキスト比較', path: '/' },
+    { icon: '🖼️', label: '画像生成比較', path: '/image' },
+    { divider: true, icon: '', label: '', path: '' },
+    { icon: '🔑', label: 'ログイン', path: '#', onClick: () => setShowLoginModal(true) },
+    { icon: '📝', label: '新規登録', path: '#', onClick: () => setShowLoginModal(true) },
+    { icon: '💰', label: '価格', path: '/pricing' }
+  ];
+
+  const menuItems = user ? loggedInMenuItems : guestMenuItems;
 
   if (!isOpen) return null;
 
@@ -57,15 +72,12 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         <div className="flex flex-col h-full">
           {/* ヘッダー */}
           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center">
               <img
                 src="/image/aikurabe_logo.png"
                 alt="AIくらべ ロゴ"
-                className="w-8 h-8 object-contain"
+                className="h-8 w-auto object-contain"
               />
-              <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                AIくらべ
-              </h1>
             </div>
             <button
               onClick={onClose}
@@ -80,7 +92,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           {/* ナビゲーションメニュー */}
           <nav className="flex-1 p-4">
             <div className="space-y-1">
-              {mobileMenuItems.map((item, index) => {
+              {menuItems.map((item, index) => {
                 if (item.divider) {
                   return (
                     <div
@@ -91,6 +103,23 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 }
 
                 const isActive = pathname === item.path;
+
+                if (item.onClick) {
+                  return (
+                    <button
+                      key={item.label}
+                      onClick={() => {
+                        item.onClick?.();
+                        onClose();
+                      }}
+                      className="w-full flex items-center gap-4 px-4 py-4 rounded-lg text-left transition-all duration-200
+                        text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
+                    >
+                      <span className="text-xl">{item.icon}</span>
+                      <span className="font-medium text-base">{item.label}</span>
+                    </button>
+                  );
+                }
 
                 return (
                   <Link
@@ -152,6 +181,13 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           )}
         </div>
       </div>
+
+      {/* ログインモーダル */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        canClose={true}
+      />
     </>
   );
 }

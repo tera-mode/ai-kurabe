@@ -24,7 +24,11 @@ export default function MobileHeader() {
             </svg>
           </button>
 
-          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">AIくらべ</h1>
+          <img
+            src="/image/aikurabe_logo.png"
+            alt="AIくらべ ロゴ"
+            className="h-8 w-auto object-contain"
+          />
 
           <div className="flex space-x-2">
             <Link href="/">

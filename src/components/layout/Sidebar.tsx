@@ -3,47 +3,59 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+import LoginModal from '@/components/auth/LoginModal';
 
 interface SidebarMenuItem {
   icon: string;
   label: string;
   path: string;
   divider?: boolean;
+  onClick?: () => void;
 }
-
-const sidebarMenuItems: SidebarMenuItem[] = [
-  { icon: '⚖️', label: 'テキスト比較', path: '/' },
-  { icon: '🖼️', label: '画像生成比較', path: '/image' },
-  { divider: true, icon: '', label: '', path: '' },
-  { icon: '👤', label: 'アカウント', path: '/account' },
-  { icon: '💰', label: '価格', path: '/pricing' },
-  { icon: '⚙️', label: '設定', path: '/settings' }
-];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const loggedInMenuItems: SidebarMenuItem[] = [
+    { icon: '⚖️', label: 'テキスト比較', path: '/' },
+    { icon: '🖼️', label: '画像生成比較', path: '/image' },
+    { divider: true, icon: '', label: '', path: '' },
+    { icon: '👤', label: 'アカウント', path: '/account' },
+    { icon: '💰', label: '価格', path: '/pricing' },
+    { icon: '⚙️', label: '設定', path: '/settings' }
+  ];
+
+  const guestMenuItems: SidebarMenuItem[] = [
+    { icon: '⚖️', label: 'テキスト比較', path: '/' },
+    { icon: '🖼️', label: '画像生成比較', path: '/image' },
+    { divider: true, icon: '', label: '', path: '' },
+    { icon: '🔑', label: 'ログイン', path: '#', onClick: () => setShowLoginModal(true) },
+    { icon: '📝', label: '新規登録', path: '#', onClick: () => setShowLoginModal(true) },
+    { icon: '💰', label: '価格', path: '/pricing' }
+  ];
+
+  const menuItems = user ? loggedInMenuItems : guestMenuItems;
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-blue-100 via-indigo-100 to-purple-100 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-full">
       {/* ロゴ・ブランド */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex justify-center">
           <img
             src="/image/aikurabe_logo.png"
             alt="AIくらべ ロゴ"
-            className="w-8 h-8 object-contain"
+            className="h-10 w-auto object-contain"
           />
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-            AIくらべ
-          </h1>
         </Link>
       </div>
 
       {/* ナビゲーションメニュー */}
       <nav className="flex-1 p-4">
         <div className="space-y-1">
-          {sidebarMenuItems.map((item, index) => {
+          {menuItems.map((item, index) => {
             if (item.divider) {
               return (
                 <div
@@ -54,6 +66,20 @@ export default function Sidebar() {
             }
 
             const isActive = pathname === item.path;
+
+            if (item.onClick) {
+              return (
+                <button
+                  key={item.label}
+                  onClick={item.onClick}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200
+                    text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            }
 
             return (
               <Link
@@ -129,6 +155,13 @@ export default function Sidebar() {
           )}
         </div>
       )}
+
+      {/* ログインモーダル */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        canClose={true}
+      />
     </aside>
   );
 }
