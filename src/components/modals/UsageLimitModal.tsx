@@ -26,48 +26,8 @@ export default function UsageLimitModal({ isOpen, onClose, usageLimit }: UsageLi
     window.location.href = '/pricing';
   };
 
-  const renderFreeUserLimit = () => (
-    <div className="text-center">
-      <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.502 0L4.232 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-      </div>
-
-      <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-        無料プランの利用制限
-      </h3>
-
-      <p className="text-slate-600 dark:text-slate-400 mb-4">
-        無料プランでは{PRICING.FREE_USER_COOLDOWN_DAYS}日間に1回のみご利用いただけます
-      </p>
-
-      {usageLimit.nextAvailableDate && (
-        <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 mb-6">
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">次回ご利用可能日時</p>
-          <p className="font-semibold text-slate-900 dark:text-slate-100">
-            {formatDate(usageLimit.nextAvailableDate)}
-          </p>
-        </div>
-      )}
-
-      <div className="space-y-3">
-        <button
-          onClick={handleUpgrade}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition-colors font-medium"
-        >
-          従量課金プランにアップグレード
-        </button>
-
-        <button
-          onClick={onClose}
-          className="w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 py-3 px-4 rounded-lg transition-colors"
-        >
-          閉じる
-        </button>
-      </div>
-    </div>
-  );
+  // 7日制限廃止により、free_limitは使用されなくなった
+  const renderFreeUserLimit = () => null;
 
   const renderInsufficientDiamonds = () => (
     <div className="text-center">

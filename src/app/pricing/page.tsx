@@ -10,22 +10,22 @@ import { PRICING } from '@/types';
 
 const pricingPlans = [
   {
-    name: '無料プラン',
+    name: 'スタータープラン',
     price: '¥0',
-    period: '永続無料',
-    description: 'AIくらべを試してみたい方に最適',
+    period: '新規登録',
+    description: 'AIくらべを始める方にもれなく100ダイヤプレゼント',
     features: [
-      `${PRICING.FREE_USER_COOLDOWN_DAYS}日間に1回利用可能`,
+      '新規登録で100ダイヤもれなく付与',
       'すべてのAIモデルにアクセス可能',
       'テキストAI比較（4モデル同時）',
       '画像生成AI比較（2モデル同時）',
-      'レスポンシブデザイン対応'
+      'レスポンシブデザイン対応',
+      '使用頻度制限なし（ダイヤがある限り）'
     ],
     limitations: [
-      '利用頻度に制限があります',
-      'ダイヤの購入が必要な場合があります'
+      'ダイヤがなくなると追加購入が必要です'
     ],
-    buttonText: '現在のプラン',
+    buttonText: '無料でスタート',
     buttonVariant: 'secondary' as const,
     popular: false
   },

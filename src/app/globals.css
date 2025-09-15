@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   /* Light theme colors */
@@ -424,4 +425,77 @@ a:hover {
 
 .loading-overlay {
   @apply absolute inset-0 flex items-center justify-center bg-slate-800/80 rounded-xl;
+}
+
+/* Markdown prose styles for AI responses */
+.prose-ai {
+  @apply max-w-none;
+}
+
+.prose-ai h1,
+.prose-ai h2,
+.prose-ai h3,
+.prose-ai h4,
+.prose-ai h5,
+.prose-ai h6 {
+  @apply font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-4 first:mt-0;
+}
+
+.prose-ai h1 { @apply text-xl; }
+.prose-ai h2 { @apply text-lg; }
+.prose-ai h3 { @apply text-base; }
+.prose-ai h4 { @apply text-sm; }
+
+.prose-ai p {
+  @apply mb-4 last:mb-0;
+}
+
+.prose-ai code {
+  @apply text-blue-600 dark:text-blue-400 bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.prose-ai pre {
+  @apply bg-slate-100 dark:bg-slate-700 rounded-lg p-4 overflow-x-auto my-4;
+}
+
+.prose-ai pre code {
+  @apply bg-transparent px-0 py-0 text-sm;
+}
+
+.prose-ai ul,
+.prose-ai ol {
+  @apply mb-4 pl-6;
+}
+
+.prose-ai li {
+  @apply mb-2;
+}
+
+.prose-ai blockquote {
+  @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-4;
+}
+
+.prose-ai strong {
+  @apply font-semibold text-gray-900 dark:text-gray-100;
+}
+
+.prose-ai em {
+  @apply italic;
+}
+
+.prose-ai a {
+  @apply text-blue-600 dark:text-blue-400 hover:underline;
+}
+
+.prose-ai table {
+  @apply w-full border-collapse border border-gray-300 dark:border-gray-600 my-4;
+}
+
+.prose-ai th,
+.prose-ai td {
+  @apply border border-gray-300 dark:border-gray-600 px-3 py-2 text-left;
+}
+
+.prose-ai th {
+  @apply bg-gray-50 dark:bg-gray-700 font-semibold;
 }

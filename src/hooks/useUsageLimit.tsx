@@ -13,57 +13,34 @@ export const useUsageLimit = () => {
     estimatedImages?: number
   ): Promise<UsageLimit> => {
     if (!user) {
-      return { canUse: false, reason: 'free_limit' };
+      return { canUse: false, reason: 'insufficient_diamonds' };
     }
 
     setIsChecking(true);
 
     try {
-      if (user.membershipType === 'free') {
-        if (!user.lastUsed) {
-          return { canUse: true };
-        }
+      // ダイヤ残高をチェック
+      let requiredDiamonds = 0;
 
-        const daysSinceLastUse = (Date.now() - new Date(user.lastUsed).getTime()) / (1000 * 60 * 60 * 24);
-
-        if (daysSinceLastUse < PRICING.FREE_USER_COOLDOWN_DAYS) {
-          const nextAvailableDate = new Date(new Date(user.lastUsed).getTime() + (PRICING.FREE_USER_COOLDOWN_DAYS * 24 * 60 * 60 * 1000));
-          return {
-            canUse: false,
-            reason: 'free_limit',
-            nextAvailableDate
-          };
-        }
-
-        return { canUse: true };
+      if (estimatedTokens) {
+        requiredDiamonds += estimatedTokens * 0.1; // 仮の値
       }
 
-      // 有料会員の場合、ダイヤ残高をチェック
-      if (user.membershipType === 'paid') {
-        let requiredDiamonds = 0;
-
-        if (estimatedTokens) {
-          requiredDiamonds += estimatedTokens * 0.1; // 仮の値
-        }
-
-        if (estimatedImages) {
-          requiredDiamonds += estimatedImages * 50; // 仮の値
-        }
-
-        requiredDiamonds = Math.max(requiredDiamonds, PRICING.MINIMUM_CONSUMPTION);
-
-        if (user.diamonds < requiredDiamonds) {
-          return {
-            canUse: false,
-            reason: 'insufficient_diamonds',
-            requiredDiamonds
-          };
-        }
-
-        return { canUse: true };
+      if (estimatedImages) {
+        requiredDiamonds += estimatedImages * 50; // 仮の値
       }
 
-      return { canUse: false };
+      requiredDiamonds = Math.max(requiredDiamonds, PRICING.MINIMUM_CONSUMPTION);
+
+      if (user.diamonds < requiredDiamonds) {
+        return {
+          canUse: false,
+          reason: 'insufficient_diamonds',
+          requiredDiamonds
+        };
+      }
+
+      return { canUse: true };
     } catch (error) {
       console.error('Error checking usage limit:', error);
       return { canUse: false };
@@ -77,7 +54,7 @@ export const useUsageLimit = () => {
     images?: number,
     description?: string
   ): Promise<boolean> => {
-    if (!user || user.membershipType !== 'paid') {
+    if (!user) {
       return false;
     }
 
@@ -124,26 +101,8 @@ export const useUsageLimit = () => {
   }, [user]);
 
   const updateUsageForFreeUser = useCallback(async (): Promise<boolean> => {
-    if (!user || user.membershipType !== 'free') {
-      return false;
-    }
-
-    try {
-      const response = await fetch('/api/user/usage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'update_last_used'
-        })
-      });
-
-      return response.ok;
-    } catch (error) {
-      console.error('Error updating usage for free user:', error);
-      return false;
-    }
+    // 7日制限廃止により、この関数は不要になったが互換性のため残す
+    return true;
   }, [user]);
 
   return {

@@ -7,10 +7,11 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose?: () => void;
   canClose?: boolean;
+  initialMode?: 'signin' | 'signup';
 }
 
-export default function LoginModal({ isOpen, onClose, canClose = false }: LoginModalProps) {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+export default function LoginModal({ isOpen, onClose, canClose = false, initialMode = 'signin' }: LoginModalProps) {
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,7 @@ export default function LoginModal({ isOpen, onClose, canClose = false }: LoginM
     setError(null);
 
     try {
+      console.log('Authentication mode:', mode);
       if (mode === 'signin') {
         await signInWithEmail(email, password);
       } else {
@@ -34,6 +36,7 @@ export default function LoginModal({ isOpen, onClose, canClose = false }: LoginM
       if (onClose) onClose();
     } catch (error: unknown) {
       const firebaseError = error as { code?: string };
+      console.error('Authentication error:', firebaseError);
       setError(getErrorMessage(firebaseError.code || ''));
     } finally {
       setLoading(false);
@@ -59,6 +62,7 @@ export default function LoginModal({ isOpen, onClose, canClose = false }: LoginM
     switch (errorCode) {
       case 'auth/user-not-found':
       case 'auth/wrong-password':
+      case 'auth/invalid-credential':
         return 'メールアドレスまたはパスワードが間違っています';
       case 'auth/email-already-in-use':
         return 'このメールアドレスは既に使用されています';

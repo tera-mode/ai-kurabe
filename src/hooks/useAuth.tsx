@@ -33,8 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: firebaseUser.email!,
       displayName: firebaseUser.displayName || undefined,
       photoURL: firebaseUser.photoURL || undefined,
-      membershipType: 'free',
-      diamonds: 0,
+      membershipType: 'paid',
+      diamonds: 100,
       totalUsage: {
         textTokens: 0,
         imagesGenerated: 0
@@ -53,8 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userData: Record<string, unknown> = {
       uid: firebaseUser.uid,
       email: firebaseUser.email!,
-      membershipType: 'free',
-      diamonds: 0,
+      membershipType: 'paid',
+      diamonds: 100,
       totalUsage: {
         textTokens: 0,
         imagesGenerated: 0
@@ -164,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(prev => prev ? {
           ...prev,
           diamonds: userData.diamonds || 0,
-          membershipType: userData.membershipType || 'free',
+          membershipType: userData.membershipType || 'paid',
           totalUsage: userData.totalUsage || { textTokens: 0, imagesGenerated: 0 },
           monthlyUsage: userData.monthlyUsage || { year: new Date().getFullYear(), month: new Date().getMonth() + 1, textTokens: 0, imagesGenerated: 0 },
           updatedAt: userData.updatedAt?.toDate?.() || new Date()

@@ -121,43 +121,19 @@ export default function Sidebar() {
                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                   {user.displayName || user.email}
                 </p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  {user.membershipType === 'free' ? '無料プラン' : '有料プラン'}
-                </p>
               </div>
             </div>
           </div>
 
           {/* ダイヤ表示 */}
-          {user.membershipType === 'paid' && (
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-xl">💎</span>
-                <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {(user.diamonds || 0).toLocaleString()}
-                </div>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xl">💎</span>
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                {(user.diamonds || 0).toLocaleString()}
               </div>
             </div>
-          )}
-
-          {/* 無料プランの次回利用可能日 */}
-          {user.membershipType === 'free' && user.lastUsed && (
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 border border-yellow-200 dark:border-yellow-700">
-              <div className="text-center">
-                <div className="text-sm font-medium text-yellow-800 dark:text-yellow-400 mb-1">
-                  次回利用可能
-                </div>
-                <div className="text-xs text-yellow-700 dark:text-yellow-300">
-                  {(() => {
-                    const nextUse = new Date(new Date(user.lastUsed).getTime() + (7 * 24 * 60 * 60 * 1000));
-                    const now = new Date();
-                    if (nextUse <= now) return '利用可能';
-                    return nextUse.toLocaleDateString('ja-JP');
-                  })()}
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
 

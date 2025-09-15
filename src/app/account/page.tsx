@@ -196,10 +196,8 @@ export default function AccountPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">プラン:</span>
-                      <span className={`font-semibold ${
-                        user.membershipType === 'paid' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-900 dark:text-slate-100'
-                      }`}>
-                        {user.membershipType === 'free' ? '無料プラン' : '従量課金プラン'}
+                      <span className="font-semibold text-blue-600 dark:text-blue-400">
+                        ダイヤベースプラン
                       </span>
                     </div>
 
@@ -213,52 +211,25 @@ export default function AccountPage() {
                 </div>
 
                 <div>
-                  {user.membershipType === 'free' ? (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-800 dark:text-blue-400 mb-2">
-                        無料プラン制限
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-blue-700 dark:text-blue-300">利用間隔:</span>
-                          <span className="text-blue-900 dark:text-blue-100">
-                            {PRICING.FREE_USER_COOLDOWN_DAYS}日間に1回
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-blue-700 dark:text-blue-300">次回利用可能:</span>
-                          <span className={`font-semibold ${
-                            canUseFree ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'
-                          }`}>
-                            {canUseFree
-                              ? '利用可能'
-                              : nextFreeUseDate?.toLocaleString('ja-JP') || '未使用'
-                            }
-                          </span>
-                        </div>
-                      </div>
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-4">
+                    <h4 className="font-semibold text-blue-800 dark:text-blue-400 mb-2">
+                      ダイヤ残高
+                    </h4>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">💎</span>
+                      <span className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                        {(user.diamonds || 0).toLocaleString()}
+                      </span>
+                      <span className="text-blue-700 dark:text-blue-300 text-sm">ダイヤ</span>
                     </div>
-                  ) : (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-800 dark:text-blue-400 mb-2">
-                        ダイヤ残高
-                      </h4>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-2xl">💎</span>
-                        <span className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                          {(user.diamonds || 0).toLocaleString()}
-                        </span>
-                        <span className="text-blue-700 dark:text-blue-300 text-sm">ダイヤ</span>
-                      </div>
-                      <button
-                        onClick={handlePurchaseDiamonds}
-                        disabled={isLoading}
-                        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                      >
-                        {isLoading ? '処理中...' : 'ダイヤを追加購入'}
-                      </button>
-                    </div>
-                  )}
+                    <button
+                      onClick={handlePurchaseDiamonds}
+                      disabled={isLoading}
+                      className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      {isLoading ? '処理中...' : 'ダイヤを追加購入'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>

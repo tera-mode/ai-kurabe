@@ -161,26 +161,18 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                     <p className="font-medium text-slate-900 dark:text-slate-100 truncate">
                       {user.displayName || user.email}
                     </p>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {user.membershipType === 'free' ? '無料プラン' : '有料プラン'}
-                      </p>
-                      {user.membershipType === 'paid' && (
-                        <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400">
-                          <span>💎</span>
-                          <span>{user.diamonds?.toLocaleString() || 0}</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
 
-                <button
-                  onClick={handleLogout}
-                  className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                >
-                  ログアウト
-                </button>
+                {/* ダイヤ表示 */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xl">💎</span>
+                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      {(user.diamonds || 0).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
