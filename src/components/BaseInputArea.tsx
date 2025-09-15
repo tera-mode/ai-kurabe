@@ -17,7 +17,7 @@ export default function BaseInputArea({
 }: BaseInputAreaProps) {
   return (
     // グローバルスタイル準拠: パディング統一
-    <div className="border-t bg-gradient-to-r from-slate-800 to-slate-900 md:bg-gradient-to-r md:from-blue-100 md:via-indigo-100 md:to-purple-100 dark:md:from-slate-800 dark:md:to-slate-900 px-4 py-3 md:px-6 md:py-6 shadow-xl">
+    <div className="border-t bg-gradient-to-r from-slate-800 to-slate-900 md:bg-gradient-to-r md:from-blue-100 md:via-indigo-100 md:to-purple-100 dark:md:bg-slate-900 dark:md:bg-none px-4 py-3 md:px-6 md:py-6 shadow-xl">
       {/* 初回ユーザー向けガイド */}
       {showGuide && (
         <div className="mb-2 p-2 md:mb-4 md:p-4 bg-gradient-to-r from-blue-600 to-blue-700 border border-blue-400 rounded-xl shadow-lg">

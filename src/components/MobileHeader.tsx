@@ -27,30 +27,35 @@ export default function MobileHeader() {
           <img
             src="/image/aikurabe_logo.png"
             alt="AIくらべ ロゴ"
-            className="h-8 w-auto object-contain"
+            className="h-8 w-auto object-contain dark:hidden"
+          />
+          <img
+            src="/image/aikurabe_logo_white.png"
+            alt="AIくらべ ロゴ"
+            className="h-8 w-auto object-contain hidden dark:block"
           />
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-1">
             <Link href="/">
               <button
-                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all touch-manipulation ${
+                className={`px-1.5 py-0.5 rounded-md text-xs font-medium transition-all touch-manipulation ${
                   pathname === '/'
-                    ? 'bg-blue-500 text-white shadow-md scale-105'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 hover:scale-105'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
-                💬 テキスト
+                💬文章
               </button>
             </Link>
             <Link href="/image">
               <button
-                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all touch-manipulation ${
+                className={`px-1.5 py-0.5 rounded-md text-xs font-medium transition-all touch-manipulation ${
                   pathname === '/image'
-                    ? 'bg-blue-500 text-white shadow-md scale-105'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 hover:scale-105'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
-                🖼️ 画像
+                🖼️画像
               </button>
             </Link>
           </div>

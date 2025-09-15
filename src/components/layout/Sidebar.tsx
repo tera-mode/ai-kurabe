@@ -40,14 +40,19 @@ export default function Sidebar() {
   const menuItems = user ? loggedInMenuItems : guestMenuItems;
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-blue-100 via-indigo-100 to-purple-100 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-full">
+    <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-blue-100 via-indigo-100 to-purple-100 dark:bg-slate-900 dark:bg-none border-r border-slate-200 dark:border-slate-700 h-full">
       {/* ロゴ・ブランド */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-700">
         <Link href="/" className="flex justify-center">
           <img
             src="/image/aikurabe_logo.png"
             alt="AIくらべ ロゴ"
-            className="h-10 w-auto object-contain"
+            className="h-10 w-auto object-contain dark:hidden"
+          />
+          <img
+            src="/image/aikurabe_logo_white.png"
+            alt="AIくらべ ロゴ"
+            className="h-10 w-auto object-contain hidden dark:block"
           />
         </Link>
       </div>

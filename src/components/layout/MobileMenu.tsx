@@ -76,7 +76,12 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               <img
                 src="/image/aikurabe_logo.png"
                 alt="AIくらべ ロゴ"
-                className="h-8 w-auto object-contain"
+                className="h-8 w-auto object-contain dark:hidden"
+              />
+              <img
+                src="/image/aikurabe_logo_white.png"
+                alt="AIくらべ ロゴ"
+                className="h-8 w-auto object-contain hidden dark:block"
               />
             </div>
             <button
