@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getAuth } from 'firebase/auth';
+import Link from 'next/link';
 import PageLayout from '@/components/PageLayout';
 import MobileHeader from '@/components/MobileHeader';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,16 +22,9 @@ interface UsageStats {
   };
 }
 
-export default function AccountPage() {
-  const { user, signOut, updateUserData } = useAuth();
+function PaymentSuccessHandler() {
   const searchParams = useSearchParams();
-  const [usageStats, setUsageStats] = useState<UsageStats>({
-    thisMonth: { textTokens: 0, imagesGenerated: 0, estimatedCost: 0 },
-    allTime: { textTokens: 0, imagesGenerated: 0, totalSpent: 0 }
-  });
-  const [isLoading, setIsLoading] = useState(false);
 
-  // 決済成功時の通知表示
   useEffect(() => {
     const success = searchParams.get('success');
     const diamonds = searchParams.get('diamonds');
@@ -41,6 +35,17 @@ export default function AccountPage() {
       window.history.replaceState({}, '', '/account');
     }
   }, [searchParams]);
+
+  return null;
+}
+
+export default function AccountPage() {
+  const { user, signOut } = useAuth();
+  const [usageStats] = useState<UsageStats>({
+    thisMonth: { textTokens: 0, imagesGenerated: 0, estimatedCost: 0 },
+    allTime: { textTokens: 0, imagesGenerated: 0, totalSpent: 0 }
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   // 認証が必要なページなので、未ログインの場合はリダイレクト
   useEffect(() => {
@@ -108,6 +113,9 @@ export default function AccountPage() {
   if (!user) {
     return (
       <>
+        <Suspense fallback={<div>Loading...</div>}>
+          <PaymentSuccessHandler />
+        </Suspense>
         <MobileHeader />
         <PageLayout
           title="アカウント"
@@ -119,12 +127,12 @@ export default function AccountPage() {
               <p className="text-slate-600 dark:text-slate-400 mb-4">
                 アカウントページを表示するにはログインが必要です
               </p>
-              <a
+              <Link
                 href="/"
                 className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
               >
                 ホームに戻る
-              </a>
+              </Link>
             </div>
           </div>
         </PageLayout>
@@ -140,6 +148,9 @@ export default function AccountPage() {
 
   return (
     <>
+      <Suspense fallback={<div>Loading...</div>}>
+        <PaymentSuccessHandler />
+      </Suspense>
       <MobileHeader />
 
       <PageLayout
@@ -264,7 +275,7 @@ export default function AccountPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                        <span>🤖</span> テキスト生成
+                        <span>⚖️</span> テキスト生成
                       </span>
                       <span className="text-slate-900 dark:text-slate-100 font-medium">
                         {(user.monthlyUsage?.textTokens || 0).toLocaleString()} tokens
@@ -272,7 +283,7 @@ export default function AccountPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                        <span>🎨</span> 画像生成
+                        <span>🖼️</span> 画像生成
                       </span>
                       <span className="text-slate-900 dark:text-slate-100 font-medium">
                         {(user.monthlyUsage?.imagesGenerated || 0).toLocaleString()} 画像
@@ -282,18 +293,13 @@ export default function AccountPage() {
                       <div className="flex justify-between items-center">
                         <span className="text-slate-600 dark:text-slate-400">推定コスト</span>
                         <span className="text-slate-900 dark:text-slate-100 font-semibold">
-                          ¥{Math.ceil(
-                            ((user.monthlyUsage?.textTokens || 0) * PRICING.TEXT_COST_PER_TOKEN +
-                            (user.monthlyUsage?.imagesGenerated || 0) * PRICING.IMAGE_COST_PER_GENERATION) *
-                            PRICING.DIAMOND_RATE / PRICING.DIAMONDS_PER_500YEN
-                          ).toLocaleString()}
+                          計算中...
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-sm text-slate-500 dark:text-slate-400">
                         <span>消費ダイヤ</span>
                         <span>
-                          {((user.monthlyUsage?.textTokens || 0) * PRICING.TEXT_COST_PER_TOKEN +
-                            (user.monthlyUsage?.imagesGenerated || 0) * PRICING.IMAGE_COST_PER_GENERATION).toLocaleString()} ダイヤ
+                          計算中...
                         </span>
                       </div>
                     </div>
@@ -305,7 +311,7 @@ export default function AccountPage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                        <span>🤖</span> テキスト生成
+                        <span>⚖️</span> テキスト生成
                       </span>
                       <span className="text-slate-900 dark:text-slate-100 font-medium">
                         {(user.totalUsage?.textTokens || 0).toLocaleString()} tokens
@@ -313,7 +319,7 @@ export default function AccountPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                        <span>🎨</span> 画像生成
+                        <span>🖼️</span> 画像生成
                       </span>
                       <span className="text-slate-900 dark:text-slate-100 font-medium">
                         {(user.totalUsage?.imagesGenerated || 0).toLocaleString()} 画像

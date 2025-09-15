@@ -3,14 +3,9 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 // Firebase Admin SDK initialization
 const initializeFirebaseAdmin = () => {
-  if (getApps().length === 0) {
+  if (getApps().length === 0 && process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     try {
       const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-      
-      if (!serviceAccountKey) {
-        throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set');
-      }
-
       const serviceAccount = JSON.parse(serviceAccountKey);
 
       return initializeApp({
@@ -19,16 +14,16 @@ const initializeFirebaseAdmin = () => {
       });
     } catch (error) {
       console.error('Failed to initialize Firebase Admin SDK:', error);
-      throw error;
+      return null;
     }
   }
-  return getApps()[0];
+  return getApps()[0] || null;
 };
 
 // Initialize Firebase Admin
 const adminApp = initializeFirebaseAdmin();
 
-// Initialize Firestore Admin
-export const adminDb = getFirestore(adminApp);
+// Initialize Firestore Admin (only if adminApp exists)
+export const adminDb = adminApp ? getFirestore(adminApp) : null;
 
 export default adminApp;

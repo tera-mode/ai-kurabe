@@ -12,9 +12,9 @@ interface SidebarMenuItem {
 }
 
 const sidebarMenuItems: SidebarMenuItem[] = [
-  { icon: '🤖', label: 'テキスト比較', path: '/' },
-  { icon: '🎨', label: '画像生成比較', path: '/image' },
-  { divider: true } as any,
+  { icon: '⚖️', label: 'テキスト比較', path: '/' },
+  { icon: '🖼️', label: '画像生成比較', path: '/image' },
+  { divider: true, icon: '', label: '', path: '' },
   { icon: '👤', label: 'アカウント', path: '/account' },
   { icon: '💰', label: '価格', path: '/pricing' },
   { icon: '⚙️', label: '設定', path: '/settings' }
@@ -25,7 +25,7 @@ export default function Sidebar() {
   const { user } = useAuth();
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-full">
+    <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-blue-100 via-indigo-100 to-purple-100 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-full">
       {/* ロゴ・ブランド */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-700">
         <Link href="/" className="flex items-center gap-3">
@@ -98,20 +98,10 @@ export default function Sidebar() {
           {/* ダイヤ表示 */}
           {user.membershipType === 'paid' && (
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-700">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">💎</span>
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    ダイヤ残高
-                  </span>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                    {(user.diamonds || 0).toLocaleString()}
-                  </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    ≈ ¥{Math.floor((user.diamonds || 0) / 10)}
-                  </div>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-xl">💎</span>
+                <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {(user.diamonds || 0).toLocaleString()}
                 </div>
               </div>
             </div>

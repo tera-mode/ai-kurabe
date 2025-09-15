@@ -4,20 +4,31 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { credential } from 'firebase-admin';
 
-if (!getApps().length) {
-  const serviceAccountKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-  initializeApp({
-    credential: credential.cert(serviceAccountKey),
-  });
+if (!getApps().length && process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+  try {
+    const serviceAccountKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    initializeApp({
+      credential: credential.cert(serviceAccountKey),
+    });
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+  }
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-});
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2025-08-27.basil',
+}) : null;
 
 const db = getFirestore();
 
 export async function POST(request: NextRequest) {
+  if (!stripe) {
+    return NextResponse.json(
+      { error: 'Stripe設定が不正です' },
+      { status: 500 }
+    );
+  }
+
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
 

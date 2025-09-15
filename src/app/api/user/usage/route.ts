@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
-import { doc, getDoc, updateDoc, serverTimestamp as adminServerTimestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { PRICING } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase configuration error' }, { status: 500 });
+    }
+
     const token = req.headers.get('Authorization')?.replace('Bearer ', '');
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -17,10 +20,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action } = body;
 
-    const userRef = doc(adminDb, 'users', uid);
-    const userSnap = await getDoc(userRef);
+    const userRef = adminDb.collection('users').doc(uid);
+    const userSnap = await userRef.get();
 
-    if (!userSnap.exists()) {
+    if (!userSnap.exists) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
@@ -28,10 +31,10 @@ export async function POST(req: NextRequest) {
 
     if (action === 'update_last_used') {
       // 無料ユーザーの最終利用日を更新
-      if (userData.membershipType === 'free') {
-        await updateDoc(userRef, {
-          lastUsed: adminServerTimestamp(),
-          updatedAt: adminServerTimestamp()
+      if (userData?.membershipType === 'free') {
+        await userRef.update({
+          lastUsed: new Date(),
+          updatedAt: new Date()
         });
 
         return NextResponse.json({ success: true });
@@ -42,12 +45,16 @@ export async function POST(req: NextRequest) {
 
     if (action === 'check_limit') {
       // 利用制限をチェック
-      if (userData.membershipType === 'free') {
-        if (!userData.lastUsed) {
+      if (userData?.membershipType === 'free') {
+        if (!userData?.lastUsed) {
           return NextResponse.json({ canUse: true });
         }
 
-        const lastUsedDate = userData.lastUsed.toDate();
+        const lastUsedDate = userData?.lastUsed?.toDate?.();
+        if (!lastUsedDate) {
+          return NextResponse.json({ canUse: true });
+        }
+
         const daysSinceLastUse = (Date.now() - lastUsedDate.getTime()) / (1000 * 60 * 60 * 24);
 
         if (daysSinceLastUse < PRICING.FREE_USER_COOLDOWN_DAYS) {
@@ -63,21 +70,21 @@ export async function POST(req: NextRequest) {
       }
 
       // 有料会員の場合はダイヤ残高をチェック
-      if (userData.membershipType === 'paid') {
+      if (userData?.membershipType === 'paid') {
         const { estimatedTokens, estimatedImages } = body;
         let requiredDiamonds = 0;
 
         if (estimatedTokens) {
-          requiredDiamonds += estimatedTokens * PRICING.TEXT_COST_PER_TOKEN;
+          requiredDiamonds += estimatedTokens * 0.1; // 仮の値
         }
 
         if (estimatedImages) {
-          requiredDiamonds += estimatedImages * PRICING.IMAGE_COST_PER_GENERATION;
+          requiredDiamonds += estimatedImages * 50; // 仮の値
         }
 
         requiredDiamonds = Math.max(requiredDiamonds, PRICING.MINIMUM_CONSUMPTION);
 
-        const currentDiamonds = userData.diamonds || 0;
+        const currentDiamonds = userData?.diamonds || 0;
         if (currentDiamonds < requiredDiamonds) {
           return NextResponse.json({
             canUse: false,

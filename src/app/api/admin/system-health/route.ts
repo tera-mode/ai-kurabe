@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { credential } from 'firebase-admin';
@@ -16,7 +16,7 @@ const db = getFirestore();
 // アプリケーション開始時刻（簡易的な稼働時間計算用）
 const appStartTime = new Date();
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 管理者認証チェック
     const cookieStore = await cookies();

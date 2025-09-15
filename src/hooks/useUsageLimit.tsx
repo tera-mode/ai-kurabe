@@ -43,11 +43,11 @@ export const useUsageLimit = () => {
         let requiredDiamonds = 0;
 
         if (estimatedTokens) {
-          requiredDiamonds += estimatedTokens * PRICING.TEXT_COST_PER_TOKEN;
+          requiredDiamonds += estimatedTokens * 0.1; // 仮の値
         }
 
         if (estimatedImages) {
-          requiredDiamonds += estimatedImages * PRICING.IMAGE_COST_PER_GENERATION;
+          requiredDiamonds += estimatedImages * 50; // 仮の値
         }
 
         requiredDiamonds = Math.max(requiredDiamonds, PRICING.MINIMUM_CONSUMPTION);
@@ -85,11 +85,11 @@ export const useUsageLimit = () => {
       let consumedDiamonds = 0;
 
       if (tokens) {
-        consumedDiamonds += tokens * PRICING.TEXT_COST_PER_TOKEN;
+        consumedDiamonds += tokens * 0.1; // 仮の値
       }
 
       if (images) {
-        consumedDiamonds += images * PRICING.IMAGE_COST_PER_GENERATION;
+        consumedDiamonds += images * 50; // 仮の値
       }
 
       consumedDiamonds = Math.max(consumedDiamonds, PRICING.MINIMUM_CONSUMPTION);

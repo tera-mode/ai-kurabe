@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-      return { id: userSnap.id, ...userSnap.data() } as User;
+      return { id: userSnap.id, ...userSnap.data() } as unknown as User;
     }
 
     const newUser: User = {
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     // undefinedフィールドを除去してFirestoreに保存
-    const userData: any = {
+    const userData: Record<string, unknown> = {
       uid: firebaseUser.uid,
       email: firebaseUser.email!,
       membershipType: 'free',

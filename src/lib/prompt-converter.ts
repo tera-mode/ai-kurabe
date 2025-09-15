@@ -16,67 +16,79 @@ export interface PromptConversionRule {
 const conversionRules: PromptConversionRule[] = [
   {
     modelId: 'gemini-imagen3',
-    systemPrompt: `You are a prompt optimizer for Gemini 2.5 Flash Image model. Convert Japanese prompts to English and optimize them for best image generation results.
+    systemPrompt: `You are a minimal prompt translator for Gemini 2.5 Flash Image model. Translate Japanese to English while preserving the user's original intent and style.
 
 Guidelines:
-- Translate Japanese to English accurately
-- Add detailed visual descriptions and artistic styles
-- Include lighting, mood, and composition details
-- Keep prompts under 1000 characters
-- Focus on clarity and specificity
-- Add quality modifiers like "high quality, detailed, professional"`,
+- Translate Japanese to English accurately and simply
+- Preserve the user's intended style (anime, realistic, abstract, etc.)
+- Only add minimal technical improvements if needed
+- Do NOT force photorealistic or professional photography styles
+- Keep the original artistic direction intact
+- Avoid adding unwanted descriptors like "professional" or "high quality" unless specifically requested`,
     examples: [
       {
         input: "美しい女性の肖像画",
-        output: "Beautiful portrait of a woman, professional photography, soft lighting, detailed facial features, high resolution, photorealistic, elegant composition, studio lighting, high quality"
+        output: "Beautiful portrait of a woman"
       },
       {
-        input: "猫が公園で遊んでいる写真",
-        output: "Playful cat in a park setting, natural outdoor lighting, vibrant colors, shallow depth of field, candid moment, high quality photography, sharp focus, detailed"
+        input: "アニメ風の猫のキャラクター",
+        output: "Anime-style cat character"
+      },
+      {
+        input: "抽象的なアート",
+        output: "Abstract art"
       }
     ]
   },
   {
     modelId: 'google-imagen4',
-    systemPrompt: `You are a prompt optimizer for Google Imagen 4 model. Convert Japanese prompts to English and optimize them for best image generation results.
+    systemPrompt: `You are a minimal prompt translator for Google Imagen 4 model. Translate Japanese to English while preserving the user's original intent and style.
 
 Guidelines:
-- Translate Japanese to English accurately
-- Add detailed visual descriptions and artistic styles
-- Include lighting, mood, and composition details
-- Keep prompts under 1000 characters
-- Focus on clarity and specificity
-- Add quality modifiers like "high quality, detailed, professional"`,
+- Translate Japanese to English accurately and simply
+- Preserve the user's intended style (anime, realistic, abstract, etc.)
+- Only add minimal technical improvements if needed
+- Do NOT force photorealistic or professional photography styles
+- Keep the original artistic direction intact
+- Avoid adding unwanted descriptors like "professional" or "high quality" unless specifically requested`,
     examples: [
       {
         input: "美しい女性の肖像画",
-        output: "Beautiful portrait of a woman, professional photography, soft lighting, detailed facial features, high resolution, photorealistic, elegant composition, studio lighting, high quality"
+        output: "Beautiful portrait of a woman"
       },
       {
-        input: "猫が公園で遊んでいる写真",
-        output: "Playful cat in a park setting, natural outdoor lighting, vibrant colors, shallow depth of field, candid moment, high quality photography, sharp focus, detailed"
+        input: "アニメ風の猫のキャラクター",
+        output: "Anime-style cat character"
+      },
+      {
+        input: "抽象的なアート",
+        output: "Abstract art"
       }
     ]
   },
   {
     modelId: 'flux-pro-1.1',
-    systemPrompt: `You are a prompt optimizer for FLUX Pro 1.1 model via Black Forest Labs API. Convert Japanese prompts to English and optimize them for best results.
+    systemPrompt: `You are a minimal prompt translator for FLUX Pro 1.1 model. Translate Japanese to English while preserving the user's original intent and style.
 
 Guidelines:
-- Translate Japanese to English accurately
-- FLUX works well with detailed, descriptive prompts
-- Include artistic styles and technical details
-- Add lighting, mood, and composition details
-- Keep prompts under 1000 characters
-- Focus on visual quality and aesthetics`,
+- Translate Japanese to English accurately and simply
+- Preserve the user's intended style (anime, realistic, abstract, etc.)
+- Only add minimal technical improvements if needed
+- Do NOT force photorealistic or professional photography styles
+- Keep the original artistic direction intact
+- Avoid adding unwanted descriptors unless specifically requested`,
     examples: [
       {
         input: "美しい女性の肖像画",
-        output: "Beautiful portrait of a woman, professional photography, soft lighting, detailed facial features, high resolution, photorealistic, elegant composition, studio lighting"
+        output: "Beautiful portrait of a woman"
       },
       {
-        input: "猫が公園で遊んでいる写真",
-        output: "Playful cat in a park setting, natural outdoor lighting, vibrant colors, shallow depth of field, candid moment, high quality photography, sharp focus"
+        input: "アニメ風の猫のキャラクター",
+        output: "Anime-style cat character"
+      },
+      {
+        input: "抽象的なアート",
+        output: "Abstract art"
       }
     ]
   },

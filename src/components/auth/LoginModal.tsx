@@ -32,8 +32,9 @@ export default function LoginModal({ isOpen, onClose, canClose = false }: LoginM
         await signUpWithEmail(email, password);
       }
       if (onClose) onClose();
-    } catch (error: any) {
-      setError(getErrorMessage(error.code));
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string };
+      setError(getErrorMessage(firebaseError.code || ''));
     } finally {
       setLoading(false);
     }
@@ -46,8 +47,9 @@ export default function LoginModal({ isOpen, onClose, canClose = false }: LoginM
     try {
       await signInWithGoogle();
       if (onClose) onClose();
-    } catch (error: any) {
-      setError(getErrorMessage(error.code));
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string };
+      setError(getErrorMessage(firebaseError.code || ''));
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { credential } from 'firebase-admin';
@@ -13,7 +13,7 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 管理者認証チェック
     const cookieStore = await cookies();

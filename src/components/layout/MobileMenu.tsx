@@ -17,9 +17,9 @@ interface MobileMenuItem {
 }
 
 const mobileMenuItems: MobileMenuItem[] = [
-  { icon: '🤖', label: 'テキスト比較', path: '/' },
-  { icon: '🎨', label: '画像生成比較', path: '/image' },
-  { divider: true } as any,
+  { icon: '⚖️', label: 'テキスト比較', path: '/' },
+  { icon: '🖼️', label: '画像生成比較', path: '/image' },
+  { divider: true, icon: '', label: '', path: '' },
   { icon: '👤', label: 'アカウント', path: '/account' },
   { icon: '💰', label: '価格', path: '/pricing' },
   { icon: '⚙️', label: '設定', path: '/settings' }

@@ -1,8 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
+    if (!adminDb) {
+      return NextResponse.json({
+        success: false,
+        error: 'Firebase Admin SDK not initialized',
+        message: 'Firebase configuration missing'
+      }, { status: 500 });
+    }
+
     // Test Firebase Admin connection by creating a test document
     const testCollection = adminDb.collection('test');
     const testDoc = testCollection.doc('connection-test');

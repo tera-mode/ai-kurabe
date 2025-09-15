@@ -25,12 +25,16 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
   const { checkUsageLimit, updateUsageForFreeUser } = useUsageLimit();
 
   const samplePrompts = [
-    "JavaScript でソートアルゴリズムを実装する方法を教えて",
-    "React のuseEffectフックの使い方を詳しく説明して",
-    "データベース設計の基本原則について教えて",
-    "機械学習の基礎概念をわかりやすく説明して",
-    "Pythonでウェブスクレイピングをする方法は？",
-    "APIの設計原則とベストプラクティスを教えて"
+    "健康的なダイエット方法を教えて",
+    "子供にプログラミングを教える方法を説明して。わかりやすさを比較したい",
+    "効果的なプレゼンテーションのコツを教えて。具体例も含めて",
+    "新しい趣味を始めるための手順とおすすめを教えて",
+    "家計管理の基本とお金の貯め方について詳しく説明して",
+    "転職活動を成功させるための戦略とポイントを教えて",
+    "料理初心者でも作れる簡単で美味しいレシピを教えて",
+    "ストレス解消法とメンタルヘルスの維持方法について",
+    "英語学習を効率的に進める方法とおすすめツールは？",
+    "副業として始められるビジネスのアイデアを教えて"
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -159,8 +163,8 @@ export default function UnifiedInput({ onSend, disabled = false, activeModelCoun
             type="submit"
             disabled={disabled || !message.trim() || activeModelCount === 0}
             // グローバルスタイル準拠: ボタン高さ・角丸・カラー統一
-            className="px-4 md:px-8 h-[70px] md:h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-sm md:text-base font-bold touch-manipulation
-              rounded-2xl md:rounded-xl border-2 border-white/50 hover:from-blue-50 hover:to-white hover:border-white
+            className="px-4 md:px-8 h-[70px] md:h-[120px] bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm md:text-base font-bold touch-manipulation
+              rounded-2xl md:rounded-xl border-2 border-blue-400 hover:from-blue-600 hover:to-blue-700 hover:border-blue-500
               disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 disabled:border-slate-600
               transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105
               disabled:transform-none disabled:shadow-md min-w-[70px] md:min-w-[120px] backdrop-blur-sm"

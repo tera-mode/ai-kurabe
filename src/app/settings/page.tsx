@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import PageLayout from '@/components/PageLayout';
 import MobileHeader from '@/components/MobileHeader';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,12 +51,12 @@ export default function SettingsPage() {
               <p className="text-slate-600 dark:text-slate-400 mb-4">
                 設定ページを表示するにはログインが必要です
               </p>
-              <a
+              <Link
                 href="/"
                 className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
               >
                 ホームに戻る
-              </a>
+              </Link>
             </div>
           </div>
         </PageLayout>
@@ -93,7 +94,7 @@ export default function SettingsPage() {
                     ].map((option) => (
                       <button
                         key={option.id}
-                        onClick={() => setTheme(option.id as any)}
+                        onClick={() => setTheme(option.id as 'light' | 'dark' | 'system')}
                         className={`
                           p-4 rounded-lg border-2 transition-all text-center
                           ${theme === option.id

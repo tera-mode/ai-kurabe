@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     const statsArray = Array.from(modelStats.values()).map((stats, index) => ({
       ...stats,
       averageResponseTime: stats.responseTimes.length > 0
-        ? Math.round(stats.responseTimes.reduce((a, b) => a + b, 0) / stats.responseTimes.length)
+        ? Math.round(stats.responseTimes.reduce((a: number, b: number) => a + b, 0) / stats.responseTimes.length)
         : undefined,
       lastUsed: stats.lastUsed ? stats.lastUsed.toISOString() : null,
       popularityRank: index + 1,

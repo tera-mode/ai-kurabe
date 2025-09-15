@@ -24,7 +24,9 @@ export default function PageLayout({ children, title, subtitle, currentPage }: P
         <header className="hidden md:block border-b bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{title}</h1>
+              <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                {currentPage === 'text' ? 'テキストAI比較' : currentPage === 'image' ? '画像生成AI比較' : title}
+              </h1>
               <p className="text-sm text-slate-600 dark:text-slate-300">{subtitle}</p>
             </div>
             <div className="flex items-center gap-4">

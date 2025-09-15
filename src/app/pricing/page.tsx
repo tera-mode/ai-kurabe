@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { getAuth } from 'firebase/auth';
+import Link from 'next/link';
 import PageLayout from '@/components/PageLayout';
 import MobileHeader from '@/components/MobileHeader';
 import { useAuth } from '@/hooks/useAuth';
-import { PRICING, IMAGE_MODEL_COSTS, TEXT_MODEL_COSTS, calculateImageDiamonds, calculateTextDiamonds } from '@/types';
+import { PRICING } from '@/types';
 
 const pricingPlans = [
   {
@@ -52,12 +53,12 @@ const pricingPlans = [
 
 const features = [
   {
-    icon: '🤖',
+    icon: '⚖️',
     title: 'テキストAI比較',
     description: 'Claude、GPT-4、Geminiなど複数のAIモデルを同時に比較できます'
   },
   {
-    icon: '🎨',
+    icon: '🖼️',
     title: '画像生成AI比較',
     description: 'FLUX Pro、Gemini Imagen、DALL-E など最新の画像生成モデルを比較'
   },
@@ -176,7 +177,7 @@ export default function PricingPage() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                {pricingPlans.map((plan, index) => (
+                {pricingPlans.map((plan) => (
                   <div
                     key={plan.name}
                     className={`
@@ -268,7 +269,7 @@ export default function PricingPage() {
                 {/* テキストAI利用目安 */}
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700">
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                    <span>🤖</span> テキストAI（Claude 3.5 Sonnet）
+                    <span>⚖️</span> テキストAI（Claude 3.5 Sonnet）
                   </h3>
                   <div className="space-y-4">
                     <div className="text-center">
@@ -293,7 +294,7 @@ export default function PricingPage() {
                 {/* 画像生成AI利用目安 */}
                 <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-6 border border-purple-200 dark:border-purple-700">
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                    <span>🎨</span> 画像生成（Google Imagen 4）
+                    <span>🖼️</span> 画像生成（Google Imagen 4）
                   </h3>
                   <div className="space-y-4">
                     <div className="text-center">
@@ -436,12 +437,12 @@ export default function PricingPage() {
                   無料プランでAIモデルの比較を体験し、必要に応じて従量課金で本格活用できます
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
+                  <Link
                     href="/"
                     className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
                   >
                     無料で始める
-                  </a>
+                  </Link>
                   <button
                     onClick={handlePurchase}
                     className="bg-blue-700 hover:bg-blue-800 px-8 py-3 rounded-lg font-semibold transition-colors border-2 border-blue-400"

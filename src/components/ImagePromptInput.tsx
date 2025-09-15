@@ -29,12 +29,16 @@ export default function ImagePromptInput({
   const { checkUsageLimit, updateUsageForFreeUser } = useUsageLimit();
 
   const samplePrompts = [
-    "美しい夕焼けの海辺、波が砂浜に打ち寄せる風景",
-    "サイバーパンクな未来都市の夜景、ネオンライトが反射する雨の道路",
-    "魔法の森の中の古い図書館、本から光が溢れる幻想的なシーン",
-    "宇宙ステーションから見た地球、星々が輝く無限の宇宙空間",
-    "日本の伝統的な庭園、桜の花びらが舞い散る春の午後",
-    "スチームパンクなロボットが作業する工場の内部"
+    "アニメ風の可愛い猫のキャラクター、大きな目",
+    "ミニマルなロゴデザイン、シンプルな幾何学模様",
+    "水彩画風の花束、淡い色合い",
+    "ドット絵風のゲームキャラクター、8bit風",
+    "抽象的なアート、カラフルな色の組み合わせ",
+    "手描き風のイラスト、温かみのあるタッチ",
+    "フォトリアルな料理の写真、美味しそうなパスタ",
+    "SF映画のポスター風、宇宙船と惑星",
+    "日本の浮世絵風、富士山と桜",
+    "現代アート風の肖像画、幾何学的な要素"
   ];
 
   const handleSubmit = async (e: FormEvent) => {
@@ -113,7 +117,7 @@ export default function ImagePromptInput({
                 disabled={disabled}
                 title="人気の画像生成例を見る"
               >
-                🎨<span className="hidden sm:inline"> 画像例</span>
+                🖼️<span className="hidden sm:inline"> 画像例</span>
               </button>
 
               {/* サンプル一覧 - テキストエリア直上 */}
@@ -121,7 +125,7 @@ export default function ImagePromptInput({
                 <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border-2 border-blue-300
                   rounded-xl shadow-2xl p-4 z-20 max-h-64 overflow-y-auto animate-fadeIn">
                   <div className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                    <span className="text-lg">🎨</span>
+                    <span className="text-lg">🖼️</span>
                     人気の画像テーマをクリックして試してみましょう！
                   </div>
                   <div className="grid gap-2">
@@ -163,8 +167,8 @@ export default function ImagePromptInput({
           <button
             type="submit"
             disabled={disabled || !prompt.trim() || activeModelCount === 0}
-            className="px-4 md:px-8 h-[70px] md:h-[120px] bg-gradient-to-r from-white to-blue-50 text-slate-800 text-sm md:text-base font-bold touch-manipulation
-              rounded-2xl md:rounded-xl border-2 border-white/50 hover:from-blue-50 hover:to-white hover:border-white
+            className="px-4 md:px-8 h-[70px] md:h-[120px] bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm md:text-base font-bold touch-manipulation
+              rounded-2xl md:rounded-xl border-2 border-blue-400 hover:from-blue-600 hover:to-blue-700 hover:border-blue-500
               disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed disabled:text-slate-400 disabled:border-slate-600
               transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105
               disabled:transform-none disabled:shadow-md min-w-[70px] md:min-w-[120px] backdrop-blur-sm"
