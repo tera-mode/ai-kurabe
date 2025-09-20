@@ -108,30 +108,12 @@ const mockModels: AIModel[] = [
 
 export default function Home() {
   const { user, signOut, refreshUserData } = useAuth();
-  const [selectedModels, setSelectedModels] = useState<(AIModel | null)[]>(() => {
-    // クライアントサイドでlocalStorageから復元
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('selectedModels');
-        if (saved) {
-          const savedModelIds = JSON.parse(saved);
-          return savedModelIds.map((id: string | null) =>
-            id ? mockModels.find(model => model.id === id) || null : null
-          );
-        }
-      } catch (error) {
-        console.warn('Failed to load saved model selection:', error);
-      }
-    }
-
-    // デフォルト選択
-    return [
-      mockModels[1], // Claude 3.5 Sonnet (Latest) - モバイルでも表示
-      mockModels[4], // Claude 3 Opus - モバイルでも表示
-      mockModels[0], // GPT-4 - デスクトップのみ
-      mockModels[7]  // Gemini Pro - デスクトップのみ
-    ];
-  });
+  const [selectedModels, setSelectedModels] = useState<(AIModel | null)[]>([
+    mockModels[1], // Claude 3.5 Sonnet (Latest) - モバイルでも表示
+    mockModels[4], // Claude 3 Opus - モバイルでも表示
+    mockModels[0], // GPT-4 - デスクトップのみ
+    mockModels[7]  // Gemini Pro - デスクトップのみ
+  ]);
   const [messages, setMessages] = useState<Record<string, StreamMessage[]>>({});
   const [isLoading, setIsLoading] = useState(false);
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map());
@@ -163,6 +145,20 @@ export default function Home() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
+
+    // Restore saved model selection from localStorage
+    try {
+      const saved = localStorage.getItem('selectedModels');
+      if (saved) {
+        const savedModelIds = JSON.parse(saved);
+        const restoredModels = savedModelIds.map((id: string | null) =>
+          id ? mockModels.find(model => model.id === id) || null : null
+        );
+        setSelectedModels(restoredModels);
+      }
+    } catch (error) {
+      console.warn('Failed to load saved model selection:', error);
+    }
 
     checkMobile();
     window.addEventListener('resize', checkMobile);

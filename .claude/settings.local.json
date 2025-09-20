@@ -23,7 +23,9 @@
       "Bash(cmd /c:*)",
       "WebFetch(domain:localhost)",
       "WebFetch(domain:chatplayground.ai)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(firebase init:*)"
     ],
     "deny": [],
     "ask": []

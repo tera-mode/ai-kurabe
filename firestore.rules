@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ユーザーデータ - 認証済みユーザーのみ、自分のデータのみアクセス可能
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // チャットセッション - 認証済みユーザーのみ、自分のセッションのみアクセス可能
+    match /chat_sessions/{sessionId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    // トランザクション - 認証済みユーザーのみ、自分のトランザクションのみ読み取り可能
+    match /transactions/{transactionId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      // 管理者以外は更新・削除不可
+      allow update, delete: if false;
+    }
+
+    // 使用量ログ - 認証済みユーザーのみ、自分のログのみアクセス可能
+    match /usage_logs/{logId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+    }
+
+    // 管理データ（モデル設定等）- 読み取りのみ全員許可、書き込みは管理者のみ
+    match /admin/{document} {
+      allow read: if true;
+      allow write: if false; // 管理者権限は別途実装
+    }
+
+    // システム設定 - 読み取りのみ全員許可
+    match /system/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // その他全てのドキュメント - デフォルトで拒否
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -155,7 +155,7 @@ export default function ChatPanel({
         </select>
         {selectedModel && (
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
-            ¥{selectedModel.costPerToken}/token
+            ¥{selectedModel.costPerToken.toFixed(5)}/token
           </div>
         )}
       </div>
